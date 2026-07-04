@@ -1,0 +1,30 @@
+{
+  "name": "tigalapankaos-cms",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Strapi CMS untuk pengelolaan konten website Tigalapankaos (Produk, Artikel, Cabang)",
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "@strapi/plugin-cloud": "5.10.1",
+    "@strapi/plugin-users-permissions": "5.10.1",
+    "@strapi/strapi": "5.10.1",
+    "better-sqlite3": "11.3.0",
+    "pg": "8.11.3",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x"
+  },
+  "strapi": {
+    "uuid": "tigalapankaos-cms"
+  }
+}

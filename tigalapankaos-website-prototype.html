@@ -454,11 +454,103 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
 </footer>
 
 <script>
+/* =======================================================================
+   KONEKSI CMS (Strapi)
+   Isi API_BASE_URL dengan URL CMS production kamu, contoh:
+   const API_BASE_URL = "https://tigalapankaos-cms.up.railway.app";
+   Kalau dikosongkan (""), website otomatis pakai data statis di bawah
+   (FALLBACK_PRODUCTS / FALLBACK_ARTICLES / FALLBACK_BRANCHES) — aman
+   untuk preview tanpa CMS aktif.
+   ======================================================================= */
+const API_BASE_URL = "";
+
+let PRODUCTS = [];
+let ARTICLES = [];
+let BRANCHES = [];
+
 function icon(color){
   return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path fill="'+color+'" d="M30 8 L10 22 L18 34 L28 28 L28 92 L72 92 L72 28 L82 34 L90 22 L70 8 L62 8 C62 14 56 18 50 18 C44 18 38 14 38 8 Z"/></svg>';
 }
 
-const PRODUCTS = [
+function fmtPrice(n){
+  return 'Rp ' + Number(n).toLocaleString('id-ID');
+}
+
+// Ambil URL gambar pertama dari field media Strapi (v5 format), atau null jika tidak ada.
+function firstImageUrl(mediaField){
+  try{
+    const arr = mediaField && mediaField.data ? mediaField.data : mediaField;
+    const item = Array.isArray(arr) ? arr[0] : arr;
+    const url = item && (item.url || (item.attributes && item.attributes.url));
+    if(!url) return null;
+    return url.startsWith('http') ? url : API_BASE_URL + url;
+  }catch(e){ return null; }
+}
+
+// Mapping response Strapi -> struktur yang dipakai komponen render di bawah.
+function mapProduct(item){
+  const img = firstImageUrl(item.images);
+  return {
+    id: item.id,
+    cat: item.category,
+    name: item.name,
+    price: fmtPrice(item.price),
+    material: item.material || '-',
+    color: (item.colors && item.colors[0]) || '#0F0F0F',
+    colors: item.colors && item.colors.length ? item.colors : ['#0F0F0F'],
+    desc: item.description || '',
+    img
+  };
+}
+function mapArticle(item){
+  return {
+    id: item.id,
+    cat: item.category,
+    title: item.title,
+    date: item.publishedDate || (item.publishedAt ? item.publishedAt.slice(0,10) : ''),
+    body: item.excerpt || item.body || '',
+    cover: firstImageUrl(item.cover)
+  };
+}
+function mapBranch(item){
+  return { city: item.city, addr: item.address, wa: item.whatsapp };
+}
+
+async function fetchJSON(path){
+  const res = await fetch(API_BASE_URL + path);
+  if(!res.ok) throw new Error('Request failed: ' + path);
+  return res.json();
+}
+
+// Ambil data dari CMS Strapi; jika gagal/kosong API_BASE_URL, pakai fallback statis.
+async function loadData(){
+  if(!API_BASE_URL){
+    PRODUCTS = FALLBACK_PRODUCTS;
+    ARTICLES = FALLBACK_ARTICLES;
+    BRANCHES = FALLBACK_BRANCHES;
+    return;
+  }
+  try{
+    const [pRes, aRes, bRes] = await Promise.all([
+      fetchJSON('/api/products?populate=*'),
+      fetchJSON('/api/articles?populate=*'),
+      fetchJSON('/api/branches?sort=order:asc')
+    ]);
+    PRODUCTS = (pRes.data || []).map(mapProduct);
+    ARTICLES = (aRes.data || []).map(mapArticle);
+    BRANCHES = (bRes.data || []).map(mapBranch);
+    if(!PRODUCTS.length) PRODUCTS = FALLBACK_PRODUCTS;
+    if(!ARTICLES.length) ARTICLES = FALLBACK_ARTICLES;
+    if(!BRANCHES.length) BRANCHES = FALLBACK_BRANCHES;
+  }catch(err){
+    console.warn('Gagal ambil data dari CMS, pakai data statis fallback.', err);
+    PRODUCTS = FALLBACK_PRODUCTS;
+    ARTICLES = FALLBACK_ARTICLES;
+    BRANCHES = FALLBACK_BRANCHES;
+  }
+}
+
+const FALLBACK_PRODUCTS = [
   {id:1,cat:'unisex',name:'Kaos Combed 30s',price:'Rp 38.000',material:'Cotton Combed 30s',color:'#0F0F0F',colors:['#0F0F0F','#EFEFEF','#F9A31A','#5E1914'],desc:'Kaos polos bahan cotton combed 30s, lembut, menyerap keringat, dan cocok untuk kebutuhan sablon maupun daily wear.'},
   {id:2,cat:'men',name:'Kaos Combed 24s',price:'Rp 42.000',material:'Cotton Combed 24s',color:'#8E8E8E',colors:['#8E8E8E','#0F0F0F','#EFEFEF'],desc:'Gramasi lebih tebal, ideal untuk kebutuhan kaos event, seragam komunitas, dan produksi sablon skala besar.'},
   {id:3,cat:'women',name:'Kaos Raglan Wanita',price:'Rp 45.000',material:'Cotton Combed 24s',color:'#5E1914',colors:['#5E1914','#0F0F0F','#EFEFEF'],desc:'Potongan raglan yang nyaman dan stylish, tersedia dalam berbagai kombinasi warna untuk kebutuhan fashion harian.'},
@@ -469,13 +561,13 @@ const PRODUCTS = [
   {id:8,cat:'men',name:'Kaos Lengan Panjang Pria',price:'Rp 50.000',material:'Cotton Combed 30s',color:'#5E1914',colors:['#5E1914','#0F0F0F','#8E8E8E'],desc:'Kaos lengan panjang dengan bahan combed 30s, pilihan tepat untuk kebutuhan kerja lapangan maupun kasual.'}
 ];
 
-const ARTICLES = [
+const FALLBACK_ARTICLES = [
   {id:1,cat:'Tips Sablon',title:'5 Tips Memilih Bahan Kaos untuk Sablon DTG',date:'28 Jun 2026',body:'Memilih bahan kaos yang tepat sangat menentukan hasil akhir sablon DTG. Cotton combed dengan kerapatan serat yang baik akan menghasilkan warna sablon yang lebih tajam dan tahan lama. Pastikan juga memperhatikan gramasi kain sesuai kebutuhan produk akhir Anda, serta lakukan uji coba kecil sebelum produksi massal.'},
   {id:2,cat:'Panduan Bisnis',title:'Cara Memulai Usaha Konveksi dengan Modal Terbatas',date:'22 Jun 2026',body:'Usaha konveksi bisa dimulai dengan modal terbatas asalkan strategi pengadaan bahan baku tepat. Bekerja sama dengan supplier terpercaya seperti Tigalapankaos membantu menjaga kualitas dan ketersediaan stok tanpa perlu menyetok dalam jumlah besar di awal.'},
-  {id:3,cat:'Update Produk','title':'Koleksi Warna Baru Kaos Combed 30s Kini Tersedia','date':'15 Jun 2026',body:'Tigalapankaos menambah 4 pilihan warna baru untuk lini Kaos Combed 30s, melengkapi total 20+ pilihan warna yang tersedia. Seluruh warna baru sudah dapat dipesan melalui admin WhatsApp dengan stok siap kirim ke seluruh wilayah Sulawesi & Kalimantan.'}
+  {id:3,cat:'Update Produk',title:'Koleksi Warna Baru Kaos Combed 30s Kini Tersedia',date:'15 Jun 2026',body:'Tigalapankaos menambah 4 pilihan warna baru untuk lini Kaos Combed 30s, melengkapi total 20+ pilihan warna yang tersedia. Seluruh warna baru sudah dapat dipesan melalui admin WhatsApp dengan stok siap kirim ke seluruh wilayah Sulawesi & Kalimantan.'}
 ];
 
-const BRANCHES = [
+const FALLBACK_BRANCHES = [
   {city:'Makassar (Pusat)',addr:'Jl. Sultan Alauddin No. 12, Makassar, Sulawesi Selatan',wa:'6281234567890'},
   {city:'Kendari',addr:'Jl. MT. Haryono No. 45, Kendari, Sulawesi Tenggara',wa:'6281234567891'},
   {city:'Manado',addr:'Jl. Sam Ratulangi No. 88, Manado, Sulawesi Utara',wa:'6281234567892'},
@@ -484,8 +576,9 @@ const BRANCHES = [
 ];
 
 function productCard(p){
+  const thumb = p.img ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">` : icon(p.color);
   return `<div class="product-card" onclick="openProduct(${p.id})">
-    <div class="product-thumb">${icon(p.color)}</div>
+    <div class="product-thumb">${thumb}</div>
     <div class="product-info">
       <div class="product-cat uc">${p.cat}</div>
       <div class="product-name">${p.name}</div>
@@ -496,36 +589,45 @@ function productCard(p){
 }
 
 function newsCard(a){
+  const thumb = a.cover ? `<img src="${a.cover}" alt="${a.title}" style="width:100%;height:100%;object-fit:cover;">` : '';
   return `<div class="news-card" onclick="openArticle(${a.id})" style="cursor:pointer;">
-    <div class="news-thumb"></div>
+    <div class="news-thumb">${thumb}</div>
     <div class="news-cat uc">${a.cat}</div>
     <div class="news-title">${a.title}</div>
     <div class="news-date">${a.date}</div>
   </div>`;
 }
 
-document.getElementById('home-products').innerHTML = PRODUCTS.slice(0,6).map(productCard).join('');
-document.getElementById('home-news').innerHTML = ARTICLES.map(newsCard).join('');
-document.getElementById('articles-grid').innerHTML = ARTICLES.map(newsCard).join('');
-document.getElementById('branch-list').innerHTML = BRANCHES.map(b=>`
-  <div class="branch-card">
-    <h4>${b.city}</h4>
-    <p>${b.addr}</p>
-    <a href="https://wa.me/${b.wa}" target="_blank">Chat Admin Cabang &rarr;</a>
-  </div>`).join('');
+function renderAll(){
+  document.getElementById('home-products').innerHTML = PRODUCTS.slice(0,6).map(productCard).join('');
+  document.getElementById('home-news').innerHTML = ARTICLES.map(newsCard).join('');
+  document.getElementById('articles-grid').innerHTML = ARTICLES.map(newsCard).join('');
+  document.getElementById('branch-list').innerHTML = BRANCHES.map(b=>`
+    <div class="branch-card">
+      <h4>${b.city}</h4>
+      <p>${b.addr}</p>
+      <a href="https://wa.me/${b.wa}" target="_blank">Chat Admin Cabang &rarr;</a>
+    </div>`).join('');
+  filterProducts('all');
+}
 
 function filterProducts(cat){
   document.querySelectorAll('.filter-tab').forEach(t=>t.classList.toggle('active', t.dataset.cat===cat));
   const list = cat==='all' ? PRODUCTS : PRODUCTS.filter(p=>p.cat===cat);
   document.getElementById('products-grid').innerHTML = list.map(productCard).join('');
 }
-filterProducts('all');
+
+async function init(){
+  await loadData();
+  renderAll();
+}
+init();
 
 function openProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
   document.getElementById('pd-crumb').textContent = p.name;
   document.getElementById('pd-banner-title').textContent = p.name;
-  document.getElementById('pd-main').innerHTML = icon(p.color);
+  document.getElementById('pd-main').innerHTML = p.img ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">` : icon(p.color);
   document.getElementById('pd-thumbs').innerHTML = p.colors.map((c,i)=>`<div class="${i===0?'active':''}" onclick="document.getElementById('pd-main').innerHTML=icon('${c}')">${icon(c)}</div>`).join('');
   document.getElementById('pd-cat').textContent = p.cat;
   document.getElementById('pd-title').textContent = p.name;

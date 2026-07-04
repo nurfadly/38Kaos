@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Article",
+    "description": "Artikel & berita untuk SEO dan informasi pelanggan"
+  },
+  "options": { "draftAndPublish": true },
+  "pluginOptions": {},
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "category": { "type": "string", "required": true },
+    "excerpt": { "type": "text" },
+    "body": { "type": "richtext", "required": true },
+    "cover": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "publishedDate": { "type": "date" }
+  }
+}

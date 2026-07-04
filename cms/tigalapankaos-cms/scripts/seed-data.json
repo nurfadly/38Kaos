@@ -1,0 +1,14 @@
+{
+  "products": [
+    {"name":"Kaos Combed 30s","category":"unisex","price":38000,"material":"Cotton Combed 30s","description":"Kaos polos bahan cotton combed 30s, lembut, menyerap keringat, cocok untuk sablon maupun daily wear.","colors":["#0F0F0F","#EFEFEF","#F9A31A","#5E1914"],"sizes":["S","M","L","XL","XXL"],"featured":true},
+    {"name":"Kaos Combed 24s","category":"men","price":42000,"material":"Cotton Combed 24s","description":"Gramasi lebih tebal, ideal untuk kaos event, seragam komunitas, dan produksi sablon skala besar.","colors":["#8E8E8E","#0F0F0F","#EFEFEF"],"sizes":["S","M","L","XL","XXL"],"featured":true},
+    {"name":"Kaos Raglan Wanita","category":"women","price":45000,"material":"Cotton Combed 24s","description":"Potongan raglan yang nyaman dan stylish, tersedia berbagai kombinasi warna.","colors":["#5E1914","#0F0F0F","#EFEFEF"],"sizes":["S","M","L","XL"],"featured":true}
+  ],
+  "articles": [
+    {"title":"5 Tips Memilih Bahan Kaos untuk Sablon DTG","category":"Tips Sablon","excerpt":"Cara memilih bahan kaos yang tepat untuk hasil sablon DTG maksimal.","body":"Memilih bahan kaos yang tepat sangat menentukan hasil akhir sablon DTG..."}
+  ],
+  "branches": [
+    {"city":"Makassar (Pusat)","address":"Jl. Sultan Alauddin No. 12, Makassar, Sulawesi Selatan","whatsapp":"6281234567890","order":1},
+    {"city":"Kendari","address":"Jl. MT. Haryono No. 45, Kendari, Sulawesi Tenggara","whatsapp":"6281234567891","order":2}
+  ]
+}
