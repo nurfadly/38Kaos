@@ -488,16 +488,24 @@ function firstImageUrl(mediaField){
 }
 
 // Mapping response Strapi -> struktur yang dipakai komponen render di bawah.
+function parseList(str, fallback){
+  if(!str || typeof str !== 'string') return fallback;
+  const arr = str.split(',').map(s=>s.trim()).filter(Boolean);
+  return arr.length ? arr : fallback;
+}
+
 function mapProduct(item){
   const img = firstImageUrl(item.images);
+  const colors = parseList(item.colors, ['#0F0F0F']);
   return {
     id: item.id,
     cat: item.category,
     name: item.name,
     price: fmtPrice(item.price),
     material: item.material || '-',
-    color: (item.colors && item.colors[0]) || '#0F0F0F',
-    colors: item.colors && item.colors.length ? item.colors : ['#0F0F0F'],
+    color: colors[0],
+    colors: colors,
+    sizes: parseList(item.sizes, ['S','M','L','XL','XXL']),
     desc: item.description || '',
     img
   };
@@ -634,7 +642,7 @@ function openProduct(id){
   document.getElementById('pd-price').textContent = p.price;
   document.getElementById('pd-desc').textContent = p.desc;
   document.getElementById('pd-colors').innerHTML = p.colors.map((c,i)=>`<div class="color-opt ${i===0?'active':''}" style="background:${c}" onclick="selectColor(this)"></div>`).join('');
-  document.getElementById('pd-sizes').innerHTML = ['S','M','L','XL','XXL'].map((s,i)=>`<div class="size-opt ${i===1?'active':''}" onclick="selectSize(this)">${s}</div>`).join('');
+  document.getElementById('pd-sizes').innerHTML = (p.sizes || ['S','M','L','XL','XXL']).map((s,i)=>`<div class="size-opt ${i===1?'active':''}" onclick="selectSize(this)">${s}</div>`).join('');
   document.getElementById('pd-wa').href = 'https://wa.me/6281234567890?text=' + encodeURIComponent('Halo, saya tertarik dengan produk ' + p.name + '. Apakah stok tersedia?');
   document.getElementById('pd-material').textContent = p.material;
   document.getElementById('pd-spec-cat').textContent = p.cat;

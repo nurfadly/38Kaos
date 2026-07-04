@@ -21,8 +21,8 @@
     "price": { "type": "integer", "required": true },
     "material": { "type": "string" },
     "description": { "type": "text" },
-    "colors": { "type": "json", "description": "Array hex warna, contoh: [\"#0F0F0F\",\"#EFEFEF\"]" },
-    "sizes": { "type": "json", "description": "Array ukuran, contoh: [\"S\",\"M\",\"L\",\"XL\",\"XXL\"]" },
+    "colors": { "type": "string", "description": "Pisahkan dengan koma, contoh: #0F0F0F,#EFEFEF,merah" },
+    "sizes": { "type": "string", "description": "Pisahkan dengan koma, contoh: S,M,L,XL,XXL" },
     "images": { "type": "media", "multiple": true, "allowedTypes": ["images"] },
     "featured": { "type": "boolean", "default": false },
     "stockAvailable": { "type": "boolean", "default": true }
