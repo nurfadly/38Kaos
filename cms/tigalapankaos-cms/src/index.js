@@ -2,8 +2,13 @@
 
 /**
  * Bootstrap: otomatis mengaktifkan akses publik (read-only) untuk
- * Product, Article, dan Branch, supaya website bisa langsung fetch
- * data tanpa perlu setting manual di Settings > Roles > Public.
+ * Product, Article, Branch, Testimonial, Hero Slide, dan Size,
+ * supaya website bisa langsung fetch data tanpa perlu setting manual
+ * di Settings > Roles > Public.
+ *
+ * Lead (data form Contact Us) sengaja HANYA diberi izin "create" untuk
+ * publik, supaya pengunjung bisa mengirim form tapi data lead tidak
+ * bisa dibaca sembarang orang dari internet.
  */
 module.exports = {
   register() {},
@@ -16,22 +21,46 @@ module.exports = {
       'api::article.article.findOne',
       'api::branch.branch.find',
       'api::branch.branch.findOne',
+      'api::testimonial.testimonial.find',
+      'api::testimonial.testimonial.findOne',
+      'api::hero-slide.hero-slide.find',
+      'api::hero-slide.hero-slide.findOne',
+      'api::size.size.find',
+      'api::size.size.findOne',
+      // Leads: publik hanya boleh mengirim (create), tidak boleh membaca
+      'api::lead.lead.create',
     ];
 
     const publicRole = await strapi
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: 'public' } });
 
-    if (!publicRole) return;
+    if (publicRole) {
+      for (const action of actionsToEnable) {
+        const existing = await strapi
+          .query('plugin::users-permissions.permission')
+          .findOne({ where: { action, role: publicRole.id } });
 
-    for (const action of actionsToEnable) {
-      const existing = await strapi
-        .query('plugin::users-permissions.permission')
-        .findOne({ where: { action, role: publicRole.id } });
+        if (!existing) {
+          await strapi.query('plugin::users-permissions.permission').create({
+            data: { action, role: publicRole.id },
+          });
+        }
+      }
+    }
 
-      if (!existing) {
-        await strapi.query('plugin::users-permissions.permission').create({
-          data: { action, role: publicRole.id },
+    // Seed ukuran default (S, M, L, XL, XXL) supaya admin tinggal
+    // pilih (select) tanpa perlu membuat entri satu-satu dulu.
+    const defaultSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+    for (let i = 0; i < defaultSizes.length; i++) {
+      const name = defaultSizes[i];
+      const existingSize = await strapi
+        .query('api::size.size')
+        .findOne({ where: { name } });
+
+      if (!existingSize) {
+        await strapi.query('api::size.size').create({
+          data: { name, order: i },
         });
       }
     }

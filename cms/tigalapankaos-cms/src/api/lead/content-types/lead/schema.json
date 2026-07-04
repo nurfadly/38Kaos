@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "leads",
+  "info": {
+    "singularName": "lead",
+    "pluralName": "leads",
+    "displayName": "Leads (Kontak Masuk)",
+    "description": "Data yang masuk ketika pengunjung mengisi form Contact Us di website"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "email": { "type": "email" },
+    "phone": { "type": "string" },
+    "message": { "type": "text", "required": true },
+    "productInterest": { "type": "string", "description": "Produk yang ditanyakan (opsional)" },
+    "source": { "type": "string", "default": "website-contact-form" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["baru", "diproses", "selesai"],
+      "default": "baru"
+    }
+  }
+}

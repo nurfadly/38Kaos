@@ -61,6 +61,13 @@ nav.main-nav .dropdown{position:relative;}
 .hero-stats div{text-align:center;color:var(--white);}
 .hero-stats strong{display:block;font-size:30px;font-weight:900;color:var(--gold);}
 .hero-stats span{font-size:11px;letter-spacing:.08em;color:#bbb;text-transform:uppercase;}
+.hero-bg-slides{position:absolute;inset:0;z-index:0;}
+.hero-bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1s ease;}
+.hero-bg-slide.active{opacity:1;}
+.hero-bg-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(15,15,15,.82) 0%,rgba(36,36,36,.55) 55%,rgba(15,15,15,.82) 100%);}
+.hero-dots{position:absolute;left:6%;bottom:40px;display:flex;gap:8px;z-index:2;}
+.hero-dots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:background .2s;}
+.hero-dots span.active{background:var(--gold);}
 
 /* ===== Section generic ===== */
 .section{padding:88px 0;}
@@ -214,13 +221,14 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
 <!-- ================= HOME ================= -->
 <div class="page active" id="page-home">
 
-  <section class="hero">
-    <div class="hero-inner">
-      <span class="hero-tag uc">Sejak 2018 · Makassar</span>
-      <h1>Supplier Kaos Polos Terlengkap &amp; Terpercaya.</h1>
-      <p>Tigalapankaos hadir sebagai partner bisnis apparel non-branding dengan kualitas konsisten, stok terjaga, dan harga kompetitif — untuk mitra penyablon, koperasi, komunitas, hingga instansi di Sulawesi &amp; Kalimantan.</p>
+  <section class="hero" id="hero-section">
+    <div class="hero-bg-slides" id="hero-bg-slides"></div>
+    <div class="hero-inner" id="hero-text-inner">
+      <span class="hero-tag uc" id="hero-tag">Sejak 2018 · Makassar</span>
+      <h1 id="hero-title">Supplier Kaos Polos Terlengkap &amp; Terpercaya.</h1>
+      <p id="hero-subtitle">Tigalapankaos hadir sebagai partner bisnis apparel non-branding dengan kualitas konsisten, stok terjaga, dan harga kompetitif — untuk mitra penyablon, koperasi, komunitas, hingga instansi di Sulawesi &amp; Kalimantan.</p>
       <div class="hero-cta">
-        <a class="btn btn-gold" onclick="showPage('products')">Lihat Katalog</a>
+        <a class="btn btn-gold" id="hero-cta-btn" onclick="showPage('products')">Lihat Katalog</a>
         <a class="btn" style="background:transparent;border:1.5px solid #fff;color:#fff;" href="https://wa.me/6281234567890" target="_blank">Chat Admin</a>
       </div>
     </div>
@@ -229,6 +237,7 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
       <div><strong>500+</strong><span>Mitra Aktif</span></div>
       <div><strong>2</strong><span>Wilayah Utama</span></div>
     </div>
+    <div class="hero-dots" id="hero-dots"></div>
   </section>
 
   <section class="section">
@@ -252,23 +261,7 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
           <h2>Dipercaya Mitra Kerja</h2>
         </div>
       </div>
-      <div class="testi-grid">
-        <div class="testi-card">
-          <p>"Stok selalu tersedia dan warnanya konsisten dari batch ke batch. Sangat membantu produksi sablon kami tetap on-time."</p>
-          <div class="testi-name">Andi Pratama</div>
-          <div class="testi-role">Pemilik Usaha Sablon, Makassar</div>
-        </div>
-        <div class="testi-card">
-          <p>"Harga kompetitif untuk pembelian jumlah besar, dan admin selalu responsif kalau kami tanya ketersediaan."</p>
-          <div class="testi-name">Koperasi Sejahtera Bersama</div>
-          <div class="testi-role">Mitra Koperasi, Balikpapan</div>
-        </div>
-        <div class="testi-card">
-          <p>"Sudah 3 tahun jadi supplier utama komunitas kami untuk kebutuhan seragam event. Selalu tepat waktu."</p>
-          <div class="testi-name">Rina Wulandari</div>
-          <div class="testi-role">Event Organizer, Manado</div>
-        </div>
-      </div>
+      <div class="testi-grid" id="testi-grid"></div>
     </div>
   </section>
 
@@ -401,10 +394,12 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
         <h2 style="font-size:26px;font-weight:800;margin-bottom:20px;">Ada Pertanyaan? Kirim Pesan.</h2>
         <p style="color:var(--silver);font-size:14px;margin-bottom:28px;">Tim kami akan merespons secepatnya, atau langsung chat admin via WhatsApp untuk respons instan.</p>
         <form onsubmit="return submitContact(event)">
-          <div class="form-field"><label>Nama Lengkap</label><input type="text" required placeholder="Nama Anda"></div>
-          <div class="form-field"><label>No. WhatsApp</label><input type="tel" required placeholder="08xx-xxxx-xxxx"></div>
-          <div class="form-field"><label>Pesan</label><textarea rows="5" required placeholder="Tulis pertanyaan atau kebutuhan Anda"></textarea></div>
-          <button class="btn btn-dark" type="submit">Kirim Pesan</button>
+          <div class="form-field"><label>Nama Lengkap</label><input id="cf-name" type="text" required placeholder="Nama Anda"></div>
+          <div class="form-field"><label>No. WhatsApp</label><input id="cf-phone" type="tel" required placeholder="08xx-xxxx-xxxx"></div>
+          <div class="form-field"><label>Email (opsional)</label><input id="cf-email" type="email" placeholder="nama@email.com"></div>
+          <div class="form-field"><label>Pesan</label><textarea id="cf-message" rows="5" required placeholder="Tulis pertanyaan atau kebutuhan Anda"></textarea></div>
+          <button class="btn btn-dark" type="submit" id="cf-submit">Kirim Pesan</button>
+          <div id="cf-status" style="margin-top:10px;font-size:13px;"></div>
         </form>
       </div>
       <div>
@@ -467,6 +462,10 @@ const API_BASE_URL = "https://obscure-space-memory-gwrr9ppjpq439jxp-1337.app.git
 let PRODUCTS = [];
 let ARTICLES = [];
 let BRANCHES = [];
+let TESTIMONIALS = [];
+let HERO_SLIDES = [];
+let heroTimer = null;
+let heroIndex = 0;
 
 function icon(color){
   return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path fill="'+color+'" d="M30 8 L10 22 L18 34 L28 28 L28 92 L72 92 L72 28 L82 34 L90 22 L70 8 L62 8 C62 14 56 18 50 18 C44 18 38 14 38 8 Z"/></svg>';
@@ -476,15 +475,27 @@ function fmtPrice(n){
   return 'Rp ' + Number(n).toLocaleString('id-ID');
 }
 
-// Ambil URL gambar pertama dari field media Strapi (v5 format), atau null jika tidak ada.
-function firstImageUrl(mediaField){
+// Helper: normalisasi field relasi/component Strapi (v4 {data:[{id,attributes}]} atau v5 flat array) jadi array objek flat.
+function toRelationArray(field){
   try{
-    const arr = mediaField && mediaField.data ? mediaField.data : mediaField;
-    const item = Array.isArray(arr) ? arr[0] : arr;
-    const url = item && (item.url || (item.attributes && item.attributes.url));
+    if(!field) return [];
+    const arr = field.data !== undefined ? field.data : field;
+    if(!Array.isArray(arr)) return arr ? [arr] : [];
+    return arr.map(x => (x && x.attributes) ? Object.assign({id:x.id}, x.attributes) : x);
+  }catch(e){ return []; }
+}
+// Helper: ambil semua URL gambar dari field media Strapi (v4/v5), array kosong jika tidak ada.
+function allImageUrls(mediaField){
+  return toRelationArray(mediaField).map(m => {
+    const url = m && (m.url || (m.attributes && m.attributes.url));
     if(!url) return null;
     return url.startsWith('http') ? url : API_BASE_URL + url;
-  }catch(e){ return null; }
+  }).filter(Boolean);
+}
+// Ambil URL gambar pertama dari field media Strapi, atau null jika tidak ada.
+function firstImageUrl(mediaField){
+  const urls = allImageUrls(mediaField);
+  return urls.length ? urls[0] : null;
 }
 
 // Mapping response Strapi -> struktur yang dipakai komponen render di bawah.
@@ -495,8 +506,23 @@ function parseList(str, fallback){
 }
 
 function mapProduct(item){
-  const img = firstImageUrl(item.images);
-  const colors = parseList(item.colors, ['#0F0F0F']);
+  // Sub-produk per warna (component repeatable "variants")
+  const variants = toRelationArray(item.variants).map(v => ({
+    colorName: v.colorName || 'Warna',
+    colorHex: v.colorHex || '#0F0F0F',
+    images: allImageUrls(v.images),
+    sku: v.sku || '',
+    stockAvailable: v.stockAvailable !== false
+  }));
+  // Ukuran: sekarang relasi many-to-many ke Size (select, bukan ketik manual)
+  const sizes = toRelationArray(item.sizes)
+    .slice()
+    .sort((a,b)=>(a.order||0)-(b.order||0))
+    .map(s=>s.name)
+    .filter(Boolean);
+  const coverImages = allImageUrls(item.images);
+  const fallbackImg = coverImages[0] || (variants[0] && variants[0].images[0]) || null;
+  const colors = variants.length ? variants.map(v=>v.colorHex) : ['#0F0F0F'];
   return {
     id: item.id,
     cat: item.category,
@@ -505,9 +531,30 @@ function mapProduct(item){
     material: item.material || '-',
     color: colors[0],
     colors: colors,
-    sizes: parseList(item.sizes, ['S','M','L','XL','XXL']),
+    variants: variants,
+    sizes: sizes.length ? sizes : ['S','M','L','XL','XXL'],
     desc: item.description || '',
-    img
+    img: fallbackImg
+  };
+}
+function mapTestimonial(item){
+  return {
+    id: item.id,
+    name: item.customerName,
+    role: item.roleOrCompany || '',
+    content: item.content || '',
+    rating: item.rating || 5,
+    photo: firstImageUrl(item.photo)
+  };
+}
+function mapHeroSlide(item){
+  return {
+    id: item.id,
+    title: item.title || '',
+    subtitle: item.subtitle || '',
+    ctaText: item.ctaText || '',
+    ctaLink: item.ctaLink || '',
+    image: firstImageUrl(item.image)
   };
 }
 function mapArticle(item){
@@ -536,25 +583,34 @@ async function loadData(){
     PRODUCTS = FALLBACK_PRODUCTS;
     ARTICLES = FALLBACK_ARTICLES;
     BRANCHES = FALLBACK_BRANCHES;
+    TESTIMONIALS = FALLBACK_TESTIMONIALS;
+    HERO_SLIDES = [];
     return;
   }
   try{
-    const [pRes, aRes, bRes] = await Promise.all([
+    const [pRes, aRes, bRes, tRes, hRes] = await Promise.all([
       fetchJSON('/api/products?populate=*'),
       fetchJSON('/api/articles?populate=*'),
-      fetchJSON('/api/branches?sort=order:asc')
+      fetchJSON('/api/branches?sort=order:asc'),
+      fetchJSON('/api/testimonials?populate=*&sort=order:asc'),
+      fetchJSON('/api/hero-slides?populate=*&sort=order:asc')
     ]);
     PRODUCTS = (pRes.data || []).map(mapProduct);
     ARTICLES = (aRes.data || []).map(mapArticle);
     BRANCHES = (bRes.data || []).map(mapBranch);
+    TESTIMONIALS = (tRes.data || []).map(mapTestimonial);
+    HERO_SLIDES = (hRes.data || []).map(mapHeroSlide);
     if(!PRODUCTS.length) PRODUCTS = FALLBACK_PRODUCTS;
     if(!ARTICLES.length) ARTICLES = FALLBACK_ARTICLES;
     if(!BRANCHES.length) BRANCHES = FALLBACK_BRANCHES;
+    if(!TESTIMONIALS.length) TESTIMONIALS = FALLBACK_TESTIMONIALS;
   }catch(err){
     console.warn('Gagal ambil data dari CMS, pakai data statis fallback.', err);
     PRODUCTS = FALLBACK_PRODUCTS;
     ARTICLES = FALLBACK_ARTICLES;
     BRANCHES = FALLBACK_BRANCHES;
+    TESTIMONIALS = FALLBACK_TESTIMONIALS;
+    HERO_SLIDES = [];
   }
 }
 
@@ -583,6 +639,17 @@ const FALLBACK_BRANCHES = [
   {city:'Banjarmasin',addr:'Jl. A. Yani Km 4, Banjarmasin, Kalimantan Selatan',wa:'6281234567894'}
 ];
 
+const FALLBACK_TESTIMONIALS = [
+  {id:1,name:'Andi Pratama',role:'Pemilik Usaha Sablon, Makassar',rating:5,photo:null,content:'Stok selalu tersedia dan warnanya konsisten dari batch ke batch. Sangat membantu produksi sablon kami tetap on-time.'},
+  {id:2,name:'Koperasi Sejahtera Bersama',role:'Mitra Koperasi, Balikpapan',rating:5,photo:null,content:'Harga kompetitif untuk pembelian jumlah besar, dan admin selalu responsif kalau kami tanya ketersediaan.'},
+  {id:3,name:'Rina Wulandari',role:'Event Organizer, Manado',rating:5,photo:null,content:'Sudah 3 tahun jadi supplier utama komunitas kami untuk kebutuhan seragam event. Selalu tepat waktu.'}
+];
+
+// Kalau CMS belum punya Hero Slide, hero pakai teks statis default ini (tanpa carousel gambar).
+const FALLBACK_HERO_SLIDES = [
+  {id:0,title:'Supplier Kaos Polos Terlengkap &amp; Terpercaya.',subtitle:'Tigalapankaos hadir sebagai partner bisnis apparel non-branding dengan kualitas konsisten, stok terjaga, dan harga kompetitif — untuk mitra penyablon, koperasi, komunitas, hingga instansi di Sulawesi & Kalimantan.',ctaText:'Lihat Katalog',ctaLink:'products',image:null}
+];
+
 function productCard(p){
   const thumb = p.img ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">` : icon(p.color);
   return `<div class="product-card" onclick="openProduct(${p.id})">
@@ -606,17 +673,59 @@ function newsCard(a){
   </div>`;
 }
 
+function testimonialCard(t){
+  const stars = '★'.repeat(Math.max(1,Math.min(5,t.rating))) + '☆'.repeat(5-Math.max(1,Math.min(5,t.rating)));
+  const avatar = t.photo ? `<img src="${t.photo}" alt="${t.name}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-bottom:10px;">` : '';
+  return `<div class="testi-card">
+    ${avatar}
+    <div style="color:var(--gold);letter-spacing:2px;margin-bottom:8px;">${stars}</div>
+    <p>"${t.content}"</p>
+    <div class="testi-name">${t.name}</div>
+    <div class="testi-role">${t.role}</div>
+  </div>`;
+}
+
 function renderAll(){
   document.getElementById('home-products').innerHTML = PRODUCTS.slice(0,6).map(productCard).join('');
   document.getElementById('home-news').innerHTML = ARTICLES.map(newsCard).join('');
   document.getElementById('articles-grid').innerHTML = ARTICLES.map(newsCard).join('');
+  document.getElementById('testi-grid').innerHTML = TESTIMONIALS.map(testimonialCard).join('');
   document.getElementById('branch-list').innerHTML = BRANCHES.map(b=>`
     <div class="branch-card">
       <h4>${b.city}</h4>
       <p>${b.addr}</p>
       <a href="https://wa.me/${b.wa}" target="_blank">Chat Admin Cabang &rarr;</a>
     </div>`).join('');
+  renderHero();
   filterProducts('all');
+}
+
+function renderHero(){
+  const slides = HERO_SLIDES.length ? HERO_SLIDES : FALLBACK_HERO_SLIDES;
+  const bgWrap = document.getElementById('hero-bg-slides');
+  bgWrap.innerHTML = slides.map((s,i)=>`<div class="hero-bg-slide ${i===0?'active':''}" style="${s.image ? 'background-image:url(\''+s.image+'\')' : ''}"></div>`).join('');
+  document.getElementById('hero-dots').innerHTML = slides.length>1 ? slides.map((s,i)=>`<span class="${i===0?'active':''}" onclick="goToHeroSlide(${i})"></span>`).join('') : '';
+  heroIndex = 0;
+  applyHeroSlideText(slides[0]);
+  if(heroTimer) clearInterval(heroTimer);
+  if(slides.length>1){
+    heroTimer = setInterval(()=>{ goToHeroSlide((heroIndex+1)%slides.length); }, 6000);
+  }
+}
+function applyHeroSlideText(s){
+  if(!s) return;
+  if(s.title) document.getElementById('hero-title').innerHTML = s.title;
+  if(s.subtitle) document.getElementById('hero-subtitle').textContent = s.subtitle;
+  const ctaBtn = document.getElementById('hero-cta-btn');
+  if(s.ctaText) ctaBtn.textContent = s.ctaText;
+  if(s.ctaLink) ctaBtn.setAttribute('onclick', "showPage('"+s.ctaLink+"')");
+}
+function goToHeroSlide(i){
+  const slides = HERO_SLIDES.length ? HERO_SLIDES : FALLBACK_HERO_SLIDES;
+  heroIndex = i;
+  document.querySelectorAll('#hero-bg-slides .hero-bg-slide').forEach((el,idx)=>el.classList.toggle('active', idx===i));
+  document.querySelectorAll('#hero-dots span').forEach((el,idx)=>el.classList.toggle('active', idx===i));
+  applyHeroSlideText(slides[i]);
 }
 
 function filterProducts(cat){
@@ -631,25 +740,50 @@ async function init(){
 }
 init();
 
+let currentProduct = null;
+
 function openProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
+  currentProduct = p;
   document.getElementById('pd-crumb').textContent = p.name;
   document.getElementById('pd-banner-title').textContent = p.name;
-  document.getElementById('pd-main').innerHTML = p.img ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">` : icon(p.color);
-  document.getElementById('pd-thumbs').innerHTML = p.colors.map((c,i)=>`<div class="${i===0?'active':''}" onclick="document.getElementById('pd-main').innerHTML=icon('${c}')">${icon(c)}</div>`).join('');
   document.getElementById('pd-cat').textContent = p.cat;
   document.getElementById('pd-title').textContent = p.name;
   document.getElementById('pd-price').textContent = p.price;
   document.getElementById('pd-desc').textContent = p.desc;
-  document.getElementById('pd-colors').innerHTML = p.colors.map((c,i)=>`<div class="color-opt ${i===0?'active':''}" style="background:${c}" onclick="selectColor(this)"></div>`).join('');
-  document.getElementById('pd-sizes').innerHTML = (p.sizes || ['S','M','L','XL','XXL']).map((s,i)=>`<div class="size-opt ${i===1?'active':''}" onclick="selectSize(this)">${s}</div>`).join('');
+  // Sub-produk per warna: swatch di sini pilih varian warna, bukan cuma warna kosong.
+  const variantList = p.variants.length ? p.variants : [{colorName:'Standar', colorHex:p.color, images: p.img ? [p.img] : []}];
+  document.getElementById('pd-colors').innerHTML = variantList.map((v,i)=>`<div class="color-opt ${i===0?'active':''}" style="background:${v.colorHex}" title="${v.colorName}" onclick="selectVariant(${i})"></div>`).join('');
+  renderVariantGallery(0);
+  document.getElementById('pd-sizes').innerHTML = p.sizes.map((s,i)=>`<div class="size-opt ${i===0?'active':''}" onclick="selectSize(this)">${s}</div>`).join('');
   document.getElementById('pd-wa').href = 'https://wa.me/6281234567890?text=' + encodeURIComponent('Halo, saya tertarik dengan produk ' + p.name + '. Apakah stok tersedia?');
   document.getElementById('pd-material').textContent = p.material;
   document.getElementById('pd-spec-cat').textContent = p.cat;
   document.getElementById('pd-related').innerHTML = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,3).map(productCard).join('');
   showPage('detail');
 }
-function selectColor(el){ el.parentNode.querySelectorAll('.color-opt').forEach(x=>x.classList.remove('active')); el.classList.add('active'); }
+// Render galeri foto untuk varian warna yang dipilih (sub-produk berdasarkan warna).
+function renderVariantGallery(variantIndex){
+  const p = currentProduct;
+  const variantList = p.variants.length ? p.variants : [{colorName:'Standar', colorHex:p.color, images: p.img ? [p.img] : []}];
+  const variant = variantList[variantIndex] || variantList[0];
+  const images = (variant.images && variant.images.length) ? variant.images : (p.img ? [p.img] : []);
+  document.getElementById('pd-main').innerHTML = images.length
+    ? `<img src="${images[0]}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`
+    : icon(variant.colorHex);
+  document.getElementById('pd-thumbs').innerHTML = images.length
+    ? images.map((url,i)=>`<div class="${i===0?'active':''}" onclick="setMainImage('${url}', this)"><img src="${url}" style="width:100%;height:100%;object-fit:cover;"></div>`).join('')
+    : `<div class="active">${icon(variant.colorHex)}</div>`;
+}
+function setMainImage(url, el){
+  document.getElementById('pd-main').innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+  el.parentNode.querySelectorAll('div').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+}
+function selectVariant(i){
+  document.querySelectorAll('#pd-colors .color-opt').forEach((el,idx)=>el.classList.toggle('active', idx===i));
+  renderVariantGallery(i);
+}
 function selectSize(el){ el.parentNode.querySelectorAll('.size-opt').forEach(x=>x.classList.remove('active')); el.classList.add('active'); }
 
 function openArticle(id){
@@ -666,9 +800,40 @@ function showPage(name){
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);
 }
-function submitContact(e){
+async function submitContact(e){
   e.preventDefault();
-  alert('Terima kasih! Pesan Anda telah terkirim (prototype — belum terhubung ke server).');
+  const btn = document.getElementById('cf-submit');
+  const statusEl = document.getElementById('cf-status');
+  const payload = {
+    name: document.getElementById('cf-name').value.trim(),
+    phone: document.getElementById('cf-phone').value.trim(),
+    email: document.getElementById('cf-email').value.trim(),
+    message: document.getElementById('cf-message').value.trim(),
+    source: 'website-contact-form'
+  };
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+  statusEl.textContent = '';
+  try{
+    if(!API_BASE_URL) throw new Error('CMS belum terhubung');
+    const res = await fetch(API_BASE_URL + '/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: payload })
+    });
+    if(!res.ok) throw new Error('Gagal mengirim ke CMS');
+    statusEl.style.color = '#2e7d32';
+    statusEl.textContent = 'Terima kasih! Pesan Anda sudah tersimpan, tim kami akan segera menghubungi Anda.';
+    e.target.reset();
+  }catch(err){
+    console.warn('Gagal kirim pesan ke CMS, arahkan ke WhatsApp sebagai alternatif.', err);
+    statusEl.style.color = '#b45309';
+    statusEl.textContent = 'Pesan belum bisa tersimpan otomatis saat ini — lanjutkan via WhatsApp Admin.';
+    window.open('https://wa.me/6281234567890?text=' + encodeURIComponent('Halo, nama saya ' + (payload.name||'-') + '. ' + payload.message), '_blank');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Kirim Pesan';
+  }
   return false;
 }
 </script>

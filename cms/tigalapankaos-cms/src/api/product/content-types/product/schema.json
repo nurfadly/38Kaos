@@ -21,9 +21,25 @@
     "price": { "type": "integer", "required": true },
     "material": { "type": "string" },
     "description": { "type": "text" },
-    "colors": { "type": "string", "description": "Pisahkan dengan koma, contoh: #0F0F0F,#EFEFEF,merah" },
-    "sizes": { "type": "string", "description": "Pisahkan dengan koma, contoh: S,M,L,XL,XXL" },
-    "images": { "type": "media", "multiple": true, "allowedTypes": ["images"] },
+    "sizes": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::size.size",
+      "inversedBy": "products",
+      "description": "Tinggal pilih (select) ukuran yang tersedia, tidak perlu ketik manual"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"],
+      "description": "Foto utama/cover produk (opsional jika sudah ada foto per varian warna)"
+    },
+    "variants": {
+      "type": "component",
+      "repeatable": true,
+      "component": "product.color-variant",
+      "description": "Sub-produk per warna: setiap warna punya foto & stok sendiri. Tambah baris baru untuk tiap warna."
+    },
     "featured": { "type": "boolean", "default": false },
     "stockAvailable": { "type": "boolean", "default": true }
   }

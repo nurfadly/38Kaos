@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sizes",
+  "info": {
+    "singularName": "size",
+    "pluralName": "sizes",
+    "displayName": "Ukuran",
+    "description": "Daftar ukuran yang bisa dipilih (S, M, L, XL, dst) - tinggal pilih (select), tidak perlu ketik manual"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true, "unique": true, "description": "Contoh: S, M, L, XL, XXL" },
+    "order": { "type": "integer", "default": 0 },
+    "products": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product",
+      "mappedBy": "sizes"
+    }
+  }
+}
