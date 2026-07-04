@@ -4,4 +4,9 @@ module.exports = ({ env }) => ({
   app: {
     keys: env.array('APP_KEYS'),
   },
+  watchIgnoreFiles: [
+    '**/.tmp/**',
+    '**/data.db',
+    '**/data.db-journal',
+  ],
 });
