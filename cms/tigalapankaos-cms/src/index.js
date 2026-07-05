@@ -27,6 +27,7 @@ module.exports = {
       'api::hero-slide.hero-slide.findOne',
       'api::size.size.find',
       'api::size.size.findOne',
+      'api::site-setting.site-setting.find',
       // Leads: publik hanya boleh mengirim (create), tidak boleh membaca
       'api::lead.lead.create',
     ];
@@ -63,6 +64,19 @@ module.exports = {
           data: { name, order: i },
         });
       }
+    }
+
+    // Seed 1 entri default untuk Pengaturan Website (single type) supaya
+    // langsung ada nomor WhatsApp default begitu CMS pertama kali jalan.
+    // Admin tinggal ubah angkanya lewat Content Manager > Pengaturan Website.
+    const existingSetting = await strapi.query('api::site-setting.site-setting').findOne({});
+    if (!existingSetting) {
+      await strapi.query('api::site-setting.site-setting').create({
+        data: {
+          whatsappNumber: '6281234567890',
+          whatsappDefaultMessage: 'Halo, saya tertarik dengan produk Tigalapankaos.',
+        },
+      });
     }
   },
 };

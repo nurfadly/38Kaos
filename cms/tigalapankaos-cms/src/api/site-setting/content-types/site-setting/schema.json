@@ -1,0 +1,25 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "site-setting",
+    "pluralName": "site-settings",
+    "displayName": "Pengaturan Website",
+    "description": "Setting global website: nomor WhatsApp admin, dll. Cukup diisi 1x, otomatis dipakai di seluruh tombol WhatsApp di website."
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "whatsappNumber": {
+      "type": "string",
+      "required": true,
+      "default": "6281234567890",
+      "description": "Format: kode negara + nomor, tanpa spasi/simbol/tanda plus. Contoh: 6281234567890 (untuk 08123456789)"
+    },
+    "whatsappDefaultMessage": {
+      "type": "string",
+      "default": "Halo, saya tertarik dengan produk Tigalapankaos.",
+      "description": "Pesan default saat tombol Chat Admin/WhatsApp diklik dari halaman umum (bukan halaman detail produk)"
+    }
+  }
+}

@@ -210,13 +210,13 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
     </nav>
     <div class="header-actions">
       <a class="btn btn-outline" onclick="showPage('contact')">Hubungi Kami</a>
-      <a class="btn btn-gold" href="https://wa.me/6281234567890" target="_blank">Chat Admin</a>
+      <a class="btn btn-gold" id="wa-header-btn" href="https://wa.me/6281234567890" target="_blank">Chat Admin</a>
       <button class="burger">&#9776;</button>
     </div>
   </div>
 </header>
 
-<a class="wa-float" href="https://wa.me/6281234567890" target="_blank" title="Chat Admin via WhatsApp">&#128222;</a>
+<a class="wa-float" id="wa-float-btn" href="https://wa.me/6281234567890" target="_blank" title="Chat Admin via WhatsApp">&#128222;</a>
 
 <!-- ================= HOME ================= -->
 <div class="page active" id="page-home">
@@ -229,7 +229,7 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
       <p id="hero-subtitle">Tigalapankaos hadir sebagai partner bisnis apparel non-branding dengan kualitas konsisten, stok terjaga, dan harga kompetitif — untuk mitra penyablon, koperasi, komunitas, hingga instansi di Sulawesi &amp; Kalimantan.</p>
       <div class="hero-cta">
         <a class="btn btn-gold" id="hero-cta-btn" onclick="showPage('products')">Lihat Katalog</a>
-        <a class="btn" style="background:transparent;border:1.5px solid #fff;color:#fff;" href="https://wa.me/6281234567890" target="_blank">Chat Admin</a>
+        <a class="btn" id="wa-hero-btn" style="background:transparent;border:1.5px solid #fff;color:#fff;" href="https://wa.me/6281234567890" target="_blank">Chat Admin</a>
       </div>
     </div>
     <div class="hero-stats">
@@ -463,6 +463,8 @@ let PRODUCTS = [];
 let ARTICLES = [];
 let BRANCHES = [];
 let TESTIMONIALS = [];
+let WA_NUMBER = '6281234567890';
+let WA_DEFAULT_MSG = 'Halo, saya tertarik dengan produk Tigalapankaos.';
 let HERO_SLIDES = [];
 let heroTimer = null;
 let heroIndex = 0;
@@ -588,18 +590,24 @@ async function loadData(){
     return;
   }
   try{
-    const [pRes, aRes, bRes, tRes, hRes] = await Promise.all([
+    const [pRes, aRes, bRes, tRes, hRes, sRes] = await Promise.all([
       fetchJSON('/api/products?populate=*'),
       fetchJSON('/api/articles?populate=*'),
       fetchJSON('/api/branches?sort=order:asc'),
       fetchJSON('/api/testimonials?populate=*&sort=order:asc'),
-      fetchJSON('/api/hero-slides?populate=*&sort=order:asc')
+      fetchJSON('/api/hero-slides?populate=*&sort=order:asc'),
+      fetchJSON('/api/site-setting').catch(()=>null)
     ]);
     PRODUCTS = (pRes.data || []).map(mapProduct);
     ARTICLES = (aRes.data || []).map(mapArticle);
     BRANCHES = (bRes.data || []).map(mapBranch);
     TESTIMONIALS = (tRes.data || []).map(mapTestimonial);
     HERO_SLIDES = (hRes.data || []).map(mapHeroSlide);
+    const settingData = sRes && sRes.data ? sRes.data : null;
+    if(settingData){
+      WA_NUMBER = settingData.whatsappNumber || WA_NUMBER;
+      WA_DEFAULT_MSG = settingData.whatsappDefaultMessage || WA_DEFAULT_MSG;
+    }
     if(!PRODUCTS.length) PRODUCTS = FALLBACK_PRODUCTS;
     if(!ARTICLES.length) ARTICLES = FALLBACK_ARTICLES;
     if(!BRANCHES.length) BRANCHES = FALLBACK_BRANCHES;
@@ -612,6 +620,15 @@ async function loadData(){
     TESTIMONIALS = FALLBACK_TESTIMONIALS;
     HERO_SLIDES = [];
   }
+}
+
+// Terapkan nomor WhatsApp (dari CMS atau default) ke semua tombol WA statis di halaman.
+function applyWaNumber(){
+  const link = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(WA_DEFAULT_MSG);
+  ['wa-header-btn','wa-float-btn','wa-hero-btn'].forEach((id)=>{
+    const el = document.getElementById(id);
+    if(el) el.href = link;
+  });
 }
 
 const FALLBACK_PRODUCTS = [
@@ -736,6 +753,7 @@ function filterProducts(cat){
 
 async function init(){
   await loadData();
+  applyWaNumber();
   renderAll();
 }
 init();
@@ -756,7 +774,7 @@ function openProduct(id){
   document.getElementById('pd-colors').innerHTML = variantList.map((v,i)=>`<div class="color-opt ${i===0?'active':''}" style="background:${v.colorHex}" title="${v.colorName}" onclick="selectVariant(${i})"></div>`).join('');
   renderVariantGallery(0);
   document.getElementById('pd-sizes').innerHTML = p.sizes.map((s,i)=>`<div class="size-opt ${i===0?'active':''}" onclick="selectSize(this)">${s}</div>`).join('');
-  document.getElementById('pd-wa').href = 'https://wa.me/6281234567890?text=' + encodeURIComponent('Halo, saya tertarik dengan produk ' + p.name + '. Apakah stok tersedia?');
+  document.getElementById('pd-wa').href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent('Halo, saya tertarik dengan produk ' + p.name + '. Apakah stok tersedia?');
   document.getElementById('pd-material').textContent = p.material;
   document.getElementById('pd-spec-cat').textContent = p.cat;
   document.getElementById('pd-related').innerHTML = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,3).map(productCard).join('');
@@ -829,7 +847,7 @@ async function submitContact(e){
     console.warn('Gagal kirim pesan ke CMS, arahkan ke WhatsApp sebagai alternatif.', err);
     statusEl.style.color = '#b45309';
     statusEl.textContent = 'Pesan belum bisa tersimpan otomatis saat ini — lanjutkan via WhatsApp Admin.';
-    window.open('https://wa.me/6281234567890?text=' + encodeURIComponent('Halo, nama saya ' + (payload.name||'-') + '. ' + payload.message), '_blank');
+    window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent('Halo, nama saya ' + (payload.name||'-') + '. ' + payload.message), '_blank');
   }finally{
     btn.disabled = false;
     btn.textContent = 'Kirim Pesan';
