@@ -1,28 +1,12 @@
 import LogoWhite from './extensions/logo-white.png';
 
 export default {
-  register(app) {
-    app.widgets.register([
-      {
-        title: { id: 'widget.leads.title', defaultMessage: 'Total Leads Masuk' },
-        component: async () => {
-          const mod = await import('./extensions/widgets/LeadsWidget');
-          return mod.default;
-        },
-        id: 'leads-total-widget',
-        pluginId: 'tigalapankaos',
-      },
-      {
-        title: { id: 'widget.stock.title', defaultMessage: 'Stok Produk' },
-        component: async () => {
-          const mod = await import('./extensions/widgets/StockWidget');
-          return mod.default;
-        },
-        id: 'stock-overview-widget',
-        pluginId: 'tigalapankaos',
-      },
-    ]);
-  },
+  // Catatan: fitur "Homepage Widgets" (app.widgets.register) TIDAK tersedia
+  // di Strapi 5.10.1 yang dipakai project ini (app.widgets = undefined),
+  // sehingga sempat menyebabkan admin panel gagal render total (layar putih).
+  // Widget Total Leads & Stok Produk sudah dicabut. Untuk sementara, cek
+  // total Leads & stok produk langsung lewat menu Content Manager.
+  register(app) {},
   config: {
     // Logo Tigalapankaos di sidebar (menu) dan halaman login admin
     auth: {
