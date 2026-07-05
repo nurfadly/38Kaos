@@ -10,6 +10,7 @@
     "colorHex": { "type": "string", "description": "Contoh: #0F0F0F (untuk tampilan swatch warna)" },
     "images": { "type": "media", "multiple": true, "allowedTypes": ["images"], "required": true },
     "sku": { "type": "string" },
-    "stockAvailable": { "type": "boolean", "default": true }
+    "stockQuantity": { "type": "integer", "default": 0, "min": 0, "description": "Jumlah stok untuk warna ini" },
+    "stockAvailable": { "type": "boolean", "default": true, "description": "Bisa dimatikan manual walau stok masih ada, misal untuk warna yang mau dihentikan" }
   }
 }

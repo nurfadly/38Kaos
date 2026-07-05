@@ -41,6 +41,12 @@
       "description": "Sub-produk per warna: setiap warna punya foto & stok sendiri. Tambah baris baru untuk tiap warna."
     },
     "featured": { "type": "boolean", "default": false },
+    "stockQuantity": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "description": "Total stok produk ini. Kalau produk punya varian warna, isi total stok gabungan semua warna di sini, dan isi juga stok per warna di bagian Varian Warna."
+    },
     "stockAvailable": { "type": "boolean", "default": true }
   }
 }
