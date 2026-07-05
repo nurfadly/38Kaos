@@ -27,6 +27,12 @@
       "min": 0,
       "required": true,
       "description": "Batas minimum stok. Kalau stok produk sama atau di bawah angka ini, status produk otomatis jadi 'Perlu Restock'."
+    },
+    "sectionBackgroundImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "Gambar tekstur/background dekoratif. Dipakai otomatis sebagai background di section Testimoni, dan header halaman Produk, Artikel, & Kontak."
     }
   }
 }

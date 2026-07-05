@@ -509,6 +509,7 @@ let BRANCHES = [];
 let TESTIMONIALS = [];
 let WA_NUMBER = '6281234567890';
 let WA_DEFAULT_MSG = 'Halo, saya tertarik dengan produk Tigalapankaos.';
+let SECTION_BG_URL = null;
 let HERO_SLIDES = [];
 let heroTimer = null;
 let heroIndex = 0;
@@ -640,7 +641,7 @@ async function loadData(){
       fetchJSON('/api/branches?sort=order:asc'),
       fetchJSON('/api/testimonials?populate=*&sort=order:asc'),
       fetchJSON('/api/hero-slides?populate=*&sort=order:asc'),
-      fetchJSON('/api/site-setting').catch(()=>null)
+      fetchJSON('/api/site-setting?populate=*').catch(()=>null)
     ]);
     PRODUCTS = (pRes.data || []).map(mapProduct);
     ARTICLES = (aRes.data || []).map(mapArticle);
@@ -651,6 +652,7 @@ async function loadData(){
     if(settingData){
       WA_NUMBER = settingData.whatsappNumber || WA_NUMBER;
       WA_DEFAULT_MSG = settingData.whatsappDefaultMessage || WA_DEFAULT_MSG;
+      SECTION_BG_URL = firstImageUrl(settingData.sectionBackgroundImage);
     }
     if(!PRODUCTS.length) PRODUCTS = FALLBACK_PRODUCTS;
     if(!ARTICLES.length) ARTICLES = FALLBACK_ARTICLES;
@@ -664,6 +666,22 @@ async function loadData(){
     TESTIMONIALS = FALLBACK_TESTIMONIALS;
     HERO_SLIDES = [];
   }
+}
+
+// Terapkan gambar background dekoratif (dari CMS) ke section Testimoni & header halaman
+// Produk/Artikel/Kontak. Kalau belum ada gambar di CMS, tampilan lama (warna polos) tetap dipakai.
+function applyBgImage(){
+  if(!SECTION_BG_URL) return;
+  document.querySelectorAll('.section-bg').forEach((el)=>{
+    el.style.backgroundImage = 'linear-gradient(rgba(239,239,239,.88),rgba(239,239,239,.88)), url(\'' + SECTION_BG_URL + '\')';
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  });
+  document.querySelectorAll('.page-banner').forEach((el)=>{
+    el.style.backgroundImage = 'linear-gradient(rgba(15,15,15,.75),rgba(15,15,15,.75)), url(\'' + SECTION_BG_URL + '\')';
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  });
 }
 
 // Terapkan nomor WhatsApp (dari CMS atau default) ke semua tombol WA statis di halaman.
@@ -798,6 +816,7 @@ function filterProducts(cat){
 async function init(){
   await loadData();
   applyWaNumber();
+  applyBgImage();
   renderAll();
 }
 init();
