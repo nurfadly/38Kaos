@@ -45,7 +45,10 @@
       "type": "integer",
       "default": 0,
       "min": 0,
-      "description": "Otomatis dihitung dari menu Riwayat Stok (Stock Movement). Jangan diedit manual di sini - tambah/kurangi stok lewat Riwayat Stok supaya ada catatannya."
+      "description": "Otomatis dihitung dari menu Riwayat Stok (Stock Movement). Field ini sengaja disembunyikan dari form Product - kelola jumlah stok lewat menu Riwayat Stok saja.",
+      "pluginOptions": {
+        "content-manager": { "visible": false }
+      }
     },
     "stockAvailable": { "type": "boolean", "default": true },
     "stockStatus": {
