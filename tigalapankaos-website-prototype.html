@@ -98,6 +98,16 @@ nav.main-nav .dropdown{position:relative;}
 .filter-tab{padding:10px 22px;border:1.5px solid var(--onyx);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:var(--white);}
 .filter-tab.active{background:var(--onyx);color:var(--white);}
 
+/* ===== About / Tentang Kami ===== */
+.about-lead{max-width:760px;color:#333;font-size:15px;line-height:1.8;margin-bottom:36px;}
+.about-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+.about-card{border-top:3px solid var(--gold);padding:22px 4px 0;}
+.about-card-num{display:block;font-weight:900;font-style:italic;font-size:22px;color:var(--gold);margin-bottom:10px;}
+.about-card h4{font-size:15px;font-weight:800;margin-bottom:8px;}
+.about-card p{font-size:13px;color:var(--silver);line-height:1.6;}
+@media(max-width:900px){.about-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.about-grid{grid-template-columns:1fr;}}
+
 /* ===== Testimonial ===== */
 .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 .testi-card{background:var(--white);padding:32px 26px;border-left:4px solid var(--gold);}
@@ -238,6 +248,41 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
       <div><strong>2</strong><span>Wilayah Utama</span></div>
     </div>
     <div class="hero-dots" id="hero-dots"></div>
+  </section>
+
+  <section class="section about-section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Tentang Kami</span>
+          <h2>Kenapa Tigalapankaos?</h2>
+        </div>
+        <p>Nama "38" berasal dari "Tigalapan" — filosofi kami: tumbuh bersama mitra, satu per satu, dari Makassar untuk seluruh Sulawesi & Kalimantan.</p>
+      </div>
+      <p class="about-lead">Tigalapankaos adalah supplier kaos polos non-branding yang berdiri sejak 2018 di Makassar. Kami melayani mitra penyablon, koperasi, komunitas, hingga instansi dengan kualitas bahan yang konsisten, stok yang selalu terjaga, dan harga yang kompetitif untuk pembelian satuan maupun grosir.</p>
+      <div class="about-grid">
+        <div class="about-card">
+          <span class="about-card-num">01</span>
+          <h4>Kualitas Konsisten</h4>
+          <p>Bahan cotton combed & polyester dengan kerapatan serat dan gramasi yang terjaga di setiap batch produksi.</p>
+        </div>
+        <div class="about-card">
+          <span class="about-card-num">02</span>
+          <h4>Stok Selalu Terjaga</h4>
+          <p>Puluhan pilihan warna dan ukuran siap kirim, tanpa perlu menunggu produksi dari nol.</p>
+        </div>
+        <div class="about-card">
+          <span class="about-card-num">03</span>
+          <h4>Harga Kompetitif</h4>
+          <p>Harga bersaing untuk pembelian satuan maupun grosir, cocok untuk mitra bisnis apparel skala kecil sampai besar.</p>
+        </div>
+        <div class="about-card">
+          <span class="about-card-num">04</span>
+          <h4>Jangkauan Luas</h4>
+          <p>Melayani pengiriman ke seluruh Sulawesi & Kalimantan dengan admin cabang yang siap membantu.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="section">
