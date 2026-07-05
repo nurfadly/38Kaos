@@ -581,6 +581,7 @@ function mapProduct(item){
     variants: variants,
     sizes: sizes.length ? sizes : ['S','M','L','XL','XXL'],
     desc: item.description || '',
+    images: coverImages,
     img: fallbackImg
   };
 }
@@ -833,7 +834,7 @@ function openProduct(id){
   document.getElementById('pd-price').textContent = p.price;
   document.getElementById('pd-desc').textContent = p.desc;
   // Sub-produk per warna: swatch di sini pilih varian warna, bukan cuma warna kosong.
-  const variantList = p.variants.length ? p.variants : [{colorName:'Standar', colorHex:p.color, images: p.img ? [p.img] : []}];
+  const variantList = p.variants.length ? p.variants : [{colorName:'Standar', colorHex:p.color, images: (p.images && p.images.length) ? p.images : (p.img ? [p.img] : [])}];
   document.getElementById('pd-colors').innerHTML = variantList.map((v,i)=>`<div class="color-opt ${i===0?'active':''}" style="background:${v.colorHex}" title="${v.colorName}" onclick="selectVariant(${i})"></div>`).join('');
   renderVariantGallery(0);
   document.getElementById('pd-sizes').innerHTML = p.sizes.map((s,i)=>`<div class="size-opt ${i===0?'active':''}" onclick="selectSize(this)">${s}</div>`).join('');
@@ -846,7 +847,7 @@ function openProduct(id){
 // Render galeri foto untuk varian warna yang dipilih (sub-produk berdasarkan warna).
 function renderVariantGallery(variantIndex){
   const p = currentProduct;
-  const variantList = p.variants.length ? p.variants : [{colorName:'Standar', colorHex:p.color, images: p.img ? [p.img] : []}];
+  const variantList = p.variants.length ? p.variants : [{colorName:'Standar', colorHex:p.color, images: (p.images && p.images.length) ? p.images : (p.img ? [p.img] : [])}];
   const variant = variantList[variantIndex] || variantList[0];
   const images = (variant.images && variant.images.length) ? variant.images : (p.img ? [p.img] : []);
   document.getElementById('pd-main').innerHTML = images.length
