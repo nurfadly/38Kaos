@@ -5,3 +5,15 @@ dist/
 .strapi/
 .env
 *.log
+
+# Hasil build admin panel: sekarang dibuild langsung di Codespace (npm run build),
+# tidak perlu lagi di-commit ke git (dulu untuk workaround Railway yang sudah ditinggalkan).
+build/
+
+# File media yang diupload lewat CMS (media library) - biarkan tersimpan lokal di Codespace,
+# tidak perlu ikut di git supaya tidak bikin working tree selalu "dirty".
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Tipe TypeScript auto-generated oleh Strapi, dibuat ulang otomatis tiap start/build.
+types/
