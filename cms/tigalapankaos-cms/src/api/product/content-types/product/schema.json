@@ -45,8 +45,14 @@
       "type": "integer",
       "default": 0,
       "min": 0,
-      "description": "Total stok produk ini. Kalau produk punya varian warna, isi total stok gabungan semua warna di sini, dan isi juga stok per warna di bagian Varian Warna."
+      "description": "Otomatis dihitung dari menu Riwayat Stok (Stock Movement). Jangan diedit manual di sini - tambah/kurangi stok lewat Riwayat Stok supaya ada catatannya."
     },
-    "stockAvailable": { "type": "boolean", "default": true }
+    "stockAvailable": { "type": "boolean", "default": true },
+    "stockMovements": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::stock-movement.stock-movement",
+      "mappedBy": "product"
+    }
   }
 }

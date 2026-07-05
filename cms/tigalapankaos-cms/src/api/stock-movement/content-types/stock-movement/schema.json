@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "stock_movements",
+  "info": {
+    "singularName": "stock-movement",
+    "pluralName": "stock-movements",
+    "displayName": "Riwayat Stok",
+    "description": "Catatan mutasi stok (barang masuk/keluar) per produk. Total stok produk otomatis dihitung ulang dari riwayat ini."
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "stockMovements"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["masuk", "keluar"],
+      "required": true,
+      "default": "masuk",
+      "description": "masuk = restock/barang datang, keluar = terjual/rusak/hilang"
+    },
+    "quantity": {
+      "type": "integer",
+      "required": true,
+      "min": 1,
+      "description": "Jumlah barang yang masuk/keluar"
+    },
+    "note": {
+      "type": "string",
+      "description": "Contoh: Restock dari supplier, Terjual ke customer, Barang rusak/retur"
+    },
+    "date": {
+      "type": "date",
+      "description": "Tanggal transaksi stok (kosongkan untuk pakai tanggal hari ini)"
+    }
+  }
+}
