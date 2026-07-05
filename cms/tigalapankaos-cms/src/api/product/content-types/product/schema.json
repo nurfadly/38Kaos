@@ -48,6 +48,12 @@
       "description": "Otomatis dihitung dari menu Riwayat Stok (Stock Movement). Jangan diedit manual di sini - tambah/kurangi stok lewat Riwayat Stok supaya ada catatannya."
     },
     "stockAvailable": { "type": "boolean", "default": true },
+    "stockStatus": {
+      "type": "enumeration",
+      "enum": ["stok_aman", "perlu_restock", "stok_habis"],
+      "default": "stok_aman",
+      "description": "Otomatis dihitung dari stockQuantity dibandingkan batas minimum di Pengaturan Website (lowStockThreshold). Jangan diedit manual."
+    },
     "stockMovements": {
       "type": "relation",
       "relation": "oneToMany",

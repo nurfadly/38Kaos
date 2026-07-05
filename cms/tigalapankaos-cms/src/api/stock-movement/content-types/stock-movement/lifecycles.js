@@ -1,10 +1,13 @@
 'use strict';
 
+const { computeStockStatus, getLowStockThreshold } = require('../../../../utils/stock-status');
+
 /**
  * Setiap ada perubahan Riwayat Stok (tambah/edit/hapus), hitung ulang
  * total stok produk terkait berdasarkan seluruh riwayat "masuk" - "keluar",
- * lalu simpan hasilnya ke field Product.stockQuantity. Jadi admin tidak perlu
- * edit angka stok produk secara manual lagi, cukup catat mutasinya di sini.
+ * lalu simpan hasilnya ke field Product.stockQuantity & stockStatus. Jadi
+ * admin tidak perlu edit angka/status stok produk secara manual lagi,
+ * cukup catat mutasinya di sini.
  */
 
 function extractProductId(entity) {
@@ -28,9 +31,12 @@ async function recomputeProductStock(productId, strapi) {
   }
   if (total < 0) total = 0;
 
+  const threshold = await getLowStockThreshold(strapi);
+  const stockStatus = computeStockStatus(total, threshold);
+
   await strapi.db.query('api::product.product').update({
     where: { id: productId },
-    data: { stockQuantity: total },
+    data: { stockQuantity: total, stockStatus },
   });
 }
 

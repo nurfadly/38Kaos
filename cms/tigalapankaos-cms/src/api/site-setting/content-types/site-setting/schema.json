@@ -20,6 +20,13 @@
       "type": "string",
       "default": "Halo, saya tertarik dengan produk Tigalapankaos.",
       "description": "Pesan default saat tombol Chat Admin/WhatsApp diklik dari halaman umum (bukan halaman detail produk)"
+    },
+    "lowStockThreshold": {
+      "type": "integer",
+      "default": 5,
+      "min": 0,
+      "required": true,
+      "description": "Batas minimum stok. Kalau stok produk sama atau di bawah angka ini, status produk otomatis jadi 'Perlu Restock'."
     }
   }
 }
