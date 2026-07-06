@@ -23,9 +23,9 @@
     "note": { "type": "text", "description": "Catatan tambahan dari pemesan (opsional)" },
     "status": {
       "type": "enumeration",
-      "enum": ["baru", "diproses", "selesai", "dibatalkan"],
-      "default": "baru",
-      "description": "Update status pesanan di sini setelah dihubungi/diproses"
+      "enum": ["menunggu", "berhasil", "dibatalkan"],
+      "default": "menunggu",
+      "description": "Ubah ke 'berhasil' kalau pesanan dikonfirmasi/sudah dibayar (stok produk otomatis berkurang & tercatat di Riwayat Stok). Ubah ke 'dibatalkan' kalau pesanan batal (kalau sebelumnya sudah 'berhasil', stok otomatis dikembalikan)."
     }
   }
 }
