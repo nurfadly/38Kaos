@@ -185,6 +185,14 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
 @media(max-width:980px){
   .navwrap nav.main-nav, .header-actions .btn-outline{display:none;}
   .burger{display:block;}
+  .navwrap{flex-wrap:wrap;}
+  .navwrap.nav-open nav.main-nav{
+    display:flex;flex-direction:column;gap:20px;width:100%;order:5;
+    padding:22px 0 6px;border-top:1px solid #eee;margin-top:14px;
+  }
+  .navwrap.nav-open .header-actions{width:100%;flex-wrap:wrap;gap:12px;padding-bottom:16px;order:6;}
+  .navwrap.nav-open .header-actions .btn-outline{display:inline-flex;}
+  .navwrap.nav-open .header-actions .btn{flex:1 1 auto;text-align:center;justify-content:center;}
   .grid,.grid-4,.testi-grid,.news-grid{grid-template-columns:repeat(2,1fr);}
   .footer-grid{grid-template-columns:1fr 1fr;}
   .contact-wrap,.pd-wrap{grid-template-columns:1fr;}
@@ -207,10 +215,8 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
       <ul>
         <li><a onclick="showPage('home')">Beranda</a></li>
         <li class="dropdown"><a onclick="showPage('products'); filterProducts('all')">Produk</a>
-          <div class="dropdown-menu">
-            <a onclick="showPage('products'); filterProducts('unisex')">Unisex</a>
-            <a onclick="showPage('products'); filterProducts('men')">Men</a>
-            <a onclick="showPage('products'); filterProducts('women')">Women</a>
+          <div class="dropdown-menu" id="nav-cat-menu">
+            <a onclick="showPage('products'); filterProducts('all')">Semua</a>
           </div>
         </li>
         <li><a onclick="showPage('articles')">Artikel</a></li>
@@ -220,7 +226,7 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
     <div class="header-actions">
       <a class="btn btn-outline" onclick="showPage('contact')">Hubungi Kami</a>
       <a class="btn btn-gold" id="wa-header-btn" href="https://wa.me/6281234567890" target="_blank">Chat Admin</a>
-      <button class="burger">&#9776;</button>
+      <button class="burger" onclick="toggleMobileNav()" aria-label="Buka menu">&#9776;</button>
     </div>
   </div>
 </header>
@@ -336,9 +342,6 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
     <div class="container">
       <div class="filter-tabs" id="filter-tabs">
         <div class="filter-tab active" data-cat="all" onclick="filterProducts('all')">Semua</div>
-        <div class="filter-tab" data-cat="unisex" onclick="filterProducts('unisex')">Unisex</div>
-        <div class="filter-tab" data-cat="men" onclick="filterProducts('men')">Men</div>
-        <div class="filter-tab" data-cat="women" onclick="filterProducts('women')">Women</div>
       </div>
       <div class="grid-4 grid" id="products-grid"></div>
     </div>
@@ -504,6 +507,7 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
 const API_BASE_URL = "https://obscure-space-memory-gwrr9ppjpq439jxp-1337.app.github.dev";
 
 let PRODUCTS = [];
+let CATEGORIES = [];
 let ARTICLES = [];
 let BRANCHES = [];
 let TESTIMONIALS = [];
@@ -530,6 +534,15 @@ function toRelationArray(field){
     if(!Array.isArray(arr)) return arr ? [arr] : [];
     return arr.map(x => (x && x.attributes) ? Object.assign({id:x.id}, x.attributes) : x);
   }catch(e){ return []; }
+}
+// Helper: normalisasi field relasi single (mis. manyToOne Category) Strapi v4/v5 jadi objek flat, atau null.
+function toRelationOne(field){
+  try{
+    if(!field) return null;
+    const obj = field.data !== undefined ? field.data : field;
+    if(!obj) return null;
+    return obj.attributes ? Object.assign({id:obj.id}, obj.attributes) : obj;
+  }catch(e){ return null; }
 }
 // Helper: ambil semua URL gambar dari field media Strapi (v4/v5), array kosong jika tidak ada.
 function allImageUrls(mediaField){
@@ -570,9 +583,12 @@ function mapProduct(item){
   const coverImages = allImageUrls(item.images);
   const fallbackImg = coverImages[0] || (variants[0] && variants[0].images[0]) || null;
   const colors = variants.length ? variants.map(v=>v.colorHex) : ['#0F0F0F'];
+  // Kategori sekarang relasi ke CMS (Category), bukan enum tetap lagi.
+  const categoryObj = toRelationOne(item.category);
   return {
     id: item.id,
-    cat: item.category,
+    cat: categoryObj ? categoryObj.slug : 'unisex',
+    catName: categoryObj ? categoryObj.name : 'Unisex',
     name: item.name,
     price: fmtPrice(item.price),
     material: item.material || '-',
@@ -618,6 +634,9 @@ function mapArticle(item){
 function mapBranch(item){
   return { city: item.city, addr: item.address, wa: item.whatsapp };
 }
+function mapCategory(item){
+  return { id: item.id, slug: item.slug, name: item.name, order: item.order || 0 };
+}
 
 async function fetchJSON(path){
   const res = await fetch(API_BASE_URL + path);
@@ -629,6 +648,7 @@ async function fetchJSON(path){
 async function loadData(){
   if(!API_BASE_URL){
     PRODUCTS = FALLBACK_PRODUCTS;
+    CATEGORIES = FALLBACK_CATEGORIES;
     ARTICLES = FALLBACK_ARTICLES;
     BRANCHES = FALLBACK_BRANCHES;
     TESTIMONIALS = FALLBACK_TESTIMONIALS;
@@ -636,8 +656,9 @@ async function loadData(){
     return;
   }
   try{
-    const [pRes, aRes, bRes, tRes, hRes, sRes] = await Promise.all([
+    const [pRes, cRes, aRes, bRes, tRes, hRes, sRes] = await Promise.all([
       fetchJSON('/api/products?populate=*'),
+      fetchJSON('/api/categories?sort=order:asc'),
       fetchJSON('/api/articles?populate=*'),
       fetchJSON('/api/branches?sort=order:asc'),
       fetchJSON('/api/testimonials?populate=*&sort=order:asc'),
@@ -645,6 +666,7 @@ async function loadData(){
       fetchJSON('/api/site-setting?populate=*').catch(()=>null)
     ]);
     PRODUCTS = (pRes.data || []).map(mapProduct);
+    CATEGORIES = (cRes.data || []).map(mapCategory);
     ARTICLES = (aRes.data || []).map(mapArticle);
     BRANCHES = (bRes.data || []).map(mapBranch);
     TESTIMONIALS = (tRes.data || []).map(mapTestimonial);
@@ -656,12 +678,14 @@ async function loadData(){
       SECTION_BG_URL = firstImageUrl(settingData.sectionBackgroundImage);
     }
     if(!PRODUCTS.length) PRODUCTS = FALLBACK_PRODUCTS;
+    if(!CATEGORIES.length) CATEGORIES = FALLBACK_CATEGORIES;
     if(!ARTICLES.length) ARTICLES = FALLBACK_ARTICLES;
     if(!BRANCHES.length) BRANCHES = FALLBACK_BRANCHES;
     if(!TESTIMONIALS.length) TESTIMONIALS = FALLBACK_TESTIMONIALS;
   }catch(err){
     console.warn('Gagal ambil data dari CMS, pakai data statis fallback.', err);
     PRODUCTS = FALLBACK_PRODUCTS;
+    CATEGORIES = FALLBACK_CATEGORIES;
     ARTICLES = FALLBACK_ARTICLES;
     BRANCHES = FALLBACK_BRANCHES;
     TESTIMONIALS = FALLBACK_TESTIMONIALS;
@@ -694,15 +718,21 @@ function applyWaNumber(){
   });
 }
 
+const FALLBACK_CATEGORIES = [
+  {id:1,slug:'unisex',name:'Unisex',order:0},
+  {id:2,slug:'men',name:'Men',order:1},
+  {id:3,slug:'women',name:'Women',order:2}
+];
+
 const FALLBACK_PRODUCTS = [
-  {id:1,cat:'unisex',name:'Kaos Combed 30s',price:'Rp 38.000',material:'Cotton Combed 30s',color:'#0F0F0F',colors:['#0F0F0F','#EFEFEF','#F9A31A','#5E1914'],desc:'Kaos polos bahan cotton combed 30s, lembut, menyerap keringat, dan cocok untuk kebutuhan sablon maupun daily wear.'},
-  {id:2,cat:'men',name:'Kaos Combed 24s',price:'Rp 42.000',material:'Cotton Combed 24s',color:'#8E8E8E',colors:['#8E8E8E','#0F0F0F','#EFEFEF'],desc:'Gramasi lebih tebal, ideal untuk kebutuhan kaos event, seragam komunitas, dan produksi sablon skala besar.'},
-  {id:3,cat:'women',name:'Kaos Raglan Wanita',price:'Rp 45.000',material:'Cotton Combed 24s',color:'#5E1914',colors:['#5E1914','#0F0F0F','#EFEFEF'],desc:'Potongan raglan yang nyaman dan stylish, tersedia dalam berbagai kombinasi warna untuk kebutuhan fashion harian.'},
-  {id:4,cat:'unisex',name:'Kaos Polyester Sport',price:'Rp 36.000',material:'Polyester Dry-fit',color:'#F9A31A',colors:['#F9A31A','#0F0F0F','#EFEFEF'],desc:'Bahan polyester dry-fit yang ringan dan cepat kering, cocok untuk kaos olahraga dan event outdoor.'},
-  {id:5,cat:'men',name:'Kaos Polo Pria',price:'Rp 55.000',material:'Cotton Pique',color:'#071E07',colors:['#071E07','#0F0F0F','#EFEFEF'],desc:'Kaos polo dengan bahan cotton pique premium, tampilan lebih formal untuk kebutuhan seragam kantor & komunitas.'},
-  {id:6,cat:'women',name:'Kaos Crop Wanita',price:'Rp 40.000',material:'Cotton Combed 30s',color:'#EFEFEF',colors:['#EFEFEF','#0F0F0F','#F9A31A'],desc:'Model crop kasual dengan bahan combed 30s yang lembut, pilihan favorit untuk gaya harian yang santai.'},
-  {id:7,cat:'unisex',name:'Kaos Oversize Unisex',price:'Rp 48.000',material:'Cotton Combed 24s',color:'#0F0F0F',colors:['#0F0F0F','#8E8E8E','#EFEFEF'],desc:'Potongan oversize yang sedang tren, nyaman dipakai dan mudah dikombinasikan untuk berbagai gaya.'},
-  {id:8,cat:'men',name:'Kaos Lengan Panjang Pria',price:'Rp 50.000',material:'Cotton Combed 30s',color:'#5E1914',colors:['#5E1914','#0F0F0F','#8E8E8E'],desc:'Kaos lengan panjang dengan bahan combed 30s, pilihan tepat untuk kebutuhan kerja lapangan maupun kasual.'}
+  {id:1,cat:'unisex',catName:'Unisex',name:'Kaos Combed 30s',price:'Rp 38.000',material:'Cotton Combed 30s',color:'#0F0F0F',colors:['#0F0F0F','#EFEFEF','#F9A31A','#5E1914'],desc:'Kaos polos bahan cotton combed 30s, lembut, menyerap keringat, dan cocok untuk kebutuhan sablon maupun daily wear.'},
+  {id:2,cat:'men',catName:'Men',name:'Kaos Combed 24s',price:'Rp 42.000',material:'Cotton Combed 24s',color:'#8E8E8E',colors:['#8E8E8E','#0F0F0F','#EFEFEF'],desc:'Gramasi lebih tebal, ideal untuk kebutuhan kaos event, seragam komunitas, dan produksi sablon skala besar.'},
+  {id:3,cat:'women',catName:'Women',name:'Kaos Raglan Wanita',price:'Rp 45.000',material:'Cotton Combed 24s',color:'#5E1914',colors:['#5E1914','#0F0F0F','#EFEFEF'],desc:'Potongan raglan yang nyaman dan stylish, tersedia dalam berbagai kombinasi warna untuk kebutuhan fashion harian.'},
+  {id:4,cat:'unisex',catName:'Unisex',name:'Kaos Polyester Sport',price:'Rp 36.000',material:'Polyester Dry-fit',color:'#F9A31A',colors:['#F9A31A','#0F0F0F','#EFEFEF'],desc:'Bahan polyester dry-fit yang ringan dan cepat kering, cocok untuk kaos olahraga dan event outdoor.'},
+  {id:5,cat:'men',catName:'Men',name:'Kaos Polo Pria',price:'Rp 55.000',material:'Cotton Pique',color:'#071E07',colors:['#071E07','#0F0F0F','#EFEFEF'],desc:'Kaos polo dengan bahan cotton pique premium, tampilan lebih formal untuk kebutuhan seragam kantor & komunitas.'},
+  {id:6,cat:'women',catName:'Women',name:'Kaos Crop Wanita',price:'Rp 40.000',material:'Cotton Combed 30s',color:'#EFEFEF',colors:['#EFEFEF','#0F0F0F','#F9A31A'],desc:'Model crop kasual dengan bahan combed 30s yang lembut, pilihan favorit untuk gaya harian yang santai.'},
+  {id:7,cat:'unisex',catName:'Unisex',name:'Kaos Oversize Unisex',price:'Rp 48.000',material:'Cotton Combed 24s',color:'#0F0F0F',colors:['#0F0F0F','#8E8E8E','#EFEFEF'],desc:'Potongan oversize yang sedang tren, nyaman dipakai dan mudah dikombinasikan untuk berbagai gaya.'},
+  {id:8,cat:'men',catName:'Men',name:'Kaos Lengan Panjang Pria',price:'Rp 50.000',material:'Cotton Combed 30s',color:'#5E1914',colors:['#5E1914','#0F0F0F','#8E8E8E'],desc:'Kaos lengan panjang dengan bahan combed 30s, pilihan tepat untuk kebutuhan kerja lapangan maupun kasual.'}
 ];
 
 const FALLBACK_ARTICLES = [
@@ -735,7 +765,7 @@ function productCard(p){
   return `<div class="product-card" onclick="openProduct(${p.id})">
     <div class="product-thumb">${thumb}</div>
     <div class="product-info">
-      <div class="product-cat uc">${p.cat}</div>
+      <div class="product-cat uc">${p.catName || p.cat}</div>
       <div class="product-name">${p.name}</div>
       <div class="product-price">${p.price}</div>
       <div class="swatches">${p.colors.map(c=>`<div class="swatch" style="background:${c}"></div>`).join('')}</div>
@@ -765,7 +795,24 @@ function testimonialCard(t){
   </div>`;
 }
 
+// Render menu dropdown "Produk" di navbar dan filter tab di halaman Katalog Produk
+// secara dinamis berdasarkan kategori yang dikelola di CMS (Kategori Produk).
+function renderCategoryUI(){
+  const cats = CATEGORIES.length ? CATEGORIES : FALLBACK_CATEGORIES;
+  const navMenu = document.getElementById('nav-cat-menu');
+  if(navMenu){
+    navMenu.innerHTML = '<a onclick="showPage(\'products\'); filterProducts(\'all\')">Semua</a>' +
+      cats.map(c=>`<a onclick="showPage('products'); filterProducts('${c.slug}')">${c.name}</a>`).join('');
+  }
+  const filterTabs = document.getElementById('filter-tabs');
+  if(filterTabs){
+    filterTabs.innerHTML = '<div class="filter-tab active" data-cat="all" onclick="filterProducts(\'all\')">Semua</div>' +
+      cats.map(c=>`<div class="filter-tab" data-cat="${c.slug}" onclick="filterProducts('${c.slug}')">${c.name}</div>`).join('');
+  }
+}
+
 function renderAll(){
+  renderCategoryUI();
   document.getElementById('home-products').innerHTML = PRODUCTS.slice(0,6).map(productCard).join('');
   document.getElementById('home-news').innerHTML = ARTICLES.map(newsCard).join('');
   document.getElementById('articles-grid').innerHTML = ARTICLES.map(newsCard).join('');
@@ -829,7 +876,7 @@ function openProduct(id){
   currentProduct = p;
   document.getElementById('pd-crumb').textContent = p.name;
   document.getElementById('pd-banner-title').textContent = p.name;
-  document.getElementById('pd-cat').textContent = p.cat;
+  document.getElementById('pd-cat').textContent = p.catName || p.cat;
   document.getElementById('pd-title').textContent = p.name;
   document.getElementById('pd-price').textContent = p.price;
   document.getElementById('pd-desc').textContent = p.desc;
@@ -840,7 +887,7 @@ function openProduct(id){
   document.getElementById('pd-sizes').innerHTML = p.sizes.map((s,i)=>`<div class="size-opt ${i===0?'active':''}" onclick="selectSize(this)">${s}</div>`).join('');
   document.getElementById('pd-wa').href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent('Halo, saya tertarik dengan produk ' + p.name + '. Apakah stok tersedia?');
   document.getElementById('pd-material').textContent = p.material;
-  document.getElementById('pd-spec-cat').textContent = p.cat;
+  document.getElementById('pd-spec-cat').textContent = p.catName || p.cat;
   document.getElementById('pd-related').innerHTML = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,3).map(productCard).join('');
   showPage('detail');
 }
@@ -881,6 +928,13 @@ function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);
+  closeMobileNav();
+}
+function toggleMobileNav(){
+  document.querySelector('.navwrap').classList.toggle('nav-open');
+}
+function closeMobileNav(){
+  document.querySelector('.navwrap').classList.remove('nav-open');
 }
 async function submitContact(e){
   e.preventDefault();

@@ -1,0 +1,23 @@
+{
+  "kind": "collectionType",
+  "collectionName": "categories",
+  "info": {
+    "singularName": "category",
+    "pluralName": "categories",
+    "displayName": "Kategori Produk",
+    "description": "Kategori produk yang bisa dikonfigurasi sendiri (mis. Unisex, Men, Women), tampil sebagai menu & filter di landing page"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true, "unique": true, "description": "Nama tampilan, contoh: Unisex, Men, Women, Kids" },
+    "slug": { "type": "uid", "targetField": "name", "required": true, "description": "Otomatis dibuat dari nama, dipakai sebagai kode filter di website" },
+    "order": { "type": "integer", "default": 0, "description": "Urutan tampil di menu & filter (angka kecil tampil duluan)" },
+    "products": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product.product",
+      "mappedBy": "category"
+    }
+  }
+}

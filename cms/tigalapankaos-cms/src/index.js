@@ -27,6 +27,8 @@ module.exports = {
       'api::hero-slide.hero-slide.findOne',
       'api::size.size.find',
       'api::size.size.findOne',
+      'api::category.category.find',
+      'api::category.category.findOne',
       'api::site-setting.site-setting.find',
       // Leads: publik hanya boleh mengirim (create), tidak boleh membaca
       'api::lead.lead.create',
@@ -62,6 +64,23 @@ module.exports = {
       if (!existingSize) {
         await strapi.query('api::size.size').create({
           data: { name, order: i },
+        });
+      }
+    }
+
+    // Seed kategori default (Unisex, Men, Women) supaya menu & filter di
+    // landing page tetap jalan begitu CMS pertama kali dipakai. Admin bisa
+    // menambah/mengubah/menghapus kategori sendiri lewat menu Kategori Produk.
+    const defaultCategories = ['Unisex', 'Men', 'Women'];
+    for (let i = 0; i < defaultCategories.length; i++) {
+      const name = defaultCategories[i];
+      const existingCategory = await strapi
+        .query('api::category.category')
+        .findOne({ where: { name } });
+
+      if (!existingCategory) {
+        await strapi.query('api::category.category').create({
+          data: { name, slug: name.toLowerCase(), order: i },
         });
       }
     }
