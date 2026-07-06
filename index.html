@@ -167,10 +167,36 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
 .color-opts{display:flex;gap:12px;}
 .color-opt{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
 .color-opt.active{border-color:var(--gold);}
-.pd-actions{display:flex;gap:14px;margin-top:8px;}
+.pd-actions{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;}
 .spec-list{margin-top:30px;border-top:1px solid #eee;padding-top:20px;}
 .spec-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f2f2f2;font-size:13px;}
 .spec-row span:first-child{color:var(--silver);}
+
+/* ===== Qty selector ===== */
+.qty-selector{display:inline-flex;align-items:center;border:1.5px solid #ccc;width:fit-content;}
+.qty-selector button{width:40px;height:44px;border:none;background:var(--cloud);font-size:18px;font-weight:700;cursor:pointer;}
+.qty-selector button:hover{background:#e2e2e2;}
+.qty-selector input{width:56px;height:44px;border:none;border-left:1.5px solid #ccc;border-right:1.5px solid #ccc;text-align:center;font-size:14px;font-weight:700;-moz-appearance:textfield;}
+.qty-selector input::-webkit-outer-spin-button,.qty-selector input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+/* ===== Modal (Beli Sekarang & Sukses) ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,15,15,.6);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:var(--white);max-width:440px;width:100%;padding:36px 32px;border-radius:4px;position:relative;max-height:90vh;overflow-y:auto;}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--silver);line-height:1;}
+.modal-close:hover{color:var(--onyx);}
+.modal-box h3{font-size:20px;font-weight:800;margin-bottom:18px;}
+.modal-summary{background:var(--cloud);padding:16px 18px;margin-bottom:20px;font-size:13px;}
+.modal-summary .row{display:flex;justify-content:space-between;padding:4px 0;}
+.modal-summary .row.total{font-weight:800;font-size:15px;border-top:1px solid #ddd;margin-top:8px;padding-top:10px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;}
+.form-group input,.form-group textarea{width:100%;padding:12px 14px;border:1.5px solid #ccc;font-family:inherit;font-size:14px;}
+.form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--onyx);}
+.modal-error{color:#b91c1c;font-size:13px;margin-bottom:12px;display:none;}
+.modal-success-icon{width:64px;height:64px;border-radius:50%;background:#e8f5e9;color:#2e7d32;font-size:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+.modal-box.success-box{text-align:center;}
+.modal-box.success-box p{color:#555;font-size:14px;line-height:1.7;margin-bottom:22px;}
 
 /* ===== Article detail ===== */
 .article-detail{max-width:760px;margin:0 auto;}
@@ -232,6 +258,41 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
 </header>
 
 <a class="wa-float" id="wa-float-btn" href="https://wa.me/6281234567890" target="_blank" title="Chat Admin via WhatsApp">&#128222;</a>
+
+<!-- ================= MODAL: DETAIL PESANAN ================= -->
+<div class="modal-overlay" id="order-modal-overlay" onclick="if(event.target===this) closeOrderModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeOrderModal()" aria-label="Tutup">&times;</button>
+    <h3>Detail Pesanan</h3>
+    <div class="modal-summary">
+      <div class="row"><span id="om-product-name"></span><span id="om-qty"></span></div>
+      <div class="row total"><span>Total Harga</span><span id="om-total"></span></div>
+    </div>
+    <form onsubmit="return submitOrder(event)">
+      <div class="modal-error" id="om-error"></div>
+      <div class="form-group">
+        <label for="om-name">Nama Lengkap</label>
+        <input type="text" id="om-name" required placeholder="Masukkan nama Anda">
+      </div>
+      <div class="form-group">
+        <label for="om-phone">Nomor Telepon / WhatsApp</label>
+        <input type="tel" id="om-phone" required placeholder="Contoh: 081234567890">
+      </div>
+      <button type="submit" class="btn btn-dark" id="om-submit" style="width:100%;">Kirim Pesanan</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL: SUKSES ================= -->
+<div class="modal-overlay" id="order-success-overlay" onclick="if(event.target===this) closeSuccessModal()">
+  <div class="modal-box success-box">
+    <button class="modal-close" onclick="closeSuccessModal()" aria-label="Tutup">&times;</button>
+    <div class="modal-success-icon">&#10003;</div>
+    <h3>Pesanan Berhasil Dikirim!</h3>
+    <p>Terima kasih, pesanan Anda sudah kami terima. Tim kami akan segera menghubungi Anda melalui nomor yang didaftarkan.</p>
+    <button class="btn btn-dark" onclick="closeSuccessModal()" style="width:100%;">Tutup</button>
+  </div>
+</div>
 
 <!-- ================= HOME ================= -->
 <div class="page active" id="page-home">
@@ -375,7 +436,16 @@ footer{background:var(--onyx);color:#ccc;padding:64px 0 0;}
           <div class="opt-label">Pilih Ukuran</div>
           <div class="size-opts" id="pd-sizes"></div>
         </div>
+        <div class="opt-block">
+          <div class="opt-label">Jumlah</div>
+          <div class="qty-selector">
+            <button type="button" onclick="changeQty(-1)" aria-label="Kurangi jumlah">&minus;</button>
+            <input type="number" id="pd-qty" value="1" min="1">
+            <button type="button" onclick="changeQty(1)" aria-label="Tambah jumlah">+</button>
+          </div>
+        </div>
         <div class="pd-actions">
+          <button class="btn btn-dark" onclick="openOrderModal()">Beli Sekarang</button>
           <a class="btn btn-gold" id="pd-wa" target="_blank">Tanya via WhatsApp</a>
           <a class="btn btn-outline" onclick="showPage('products')">Kembali ke Katalog</a>
         </div>
@@ -889,6 +959,7 @@ function openProduct(id){
   document.getElementById('pd-material').textContent = p.material;
   document.getElementById('pd-spec-cat').textContent = p.catName || p.cat;
   document.getElementById('pd-related').innerHTML = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,3).map(productCard).join('');
+  document.getElementById('pd-qty').value = 1;
   showPage('detail');
 }
 // Render galeri foto untuk varian warna yang dipilih (sub-produk berdasarkan warna).
@@ -914,6 +985,78 @@ function selectVariant(i){
   renderVariantGallery(i);
 }
 function selectSize(el){ el.parentNode.querySelectorAll('.size-opt').forEach(x=>x.classList.remove('active')); el.classList.add('active'); }
+
+/* ===== Qty selector & flow "Beli Sekarang" ===== */
+function changeQty(delta){
+  const input = document.getElementById('pd-qty');
+  let val = parseInt(input.value, 10) || 1;
+  val = Math.max(1, val + delta);
+  input.value = val;
+}
+// Ambil angka murni dari string harga terformat, mis. "Rp 38.000" -> 38000.
+function parsePriceNumber(str){
+  return parseInt(String(str).replace(/[^0-9]/g, ''), 10) || 0;
+}
+function openOrderModal(){
+  if(!currentProduct) return;
+  const qty = Math.max(1, parseInt(document.getElementById('pd-qty').value, 10) || 1);
+  const priceNum = parsePriceNumber(currentProduct.price);
+  document.getElementById('om-product-name').textContent = currentProduct.name;
+  document.getElementById('om-qty').textContent = 'Jumlah: ' + qty;
+  document.getElementById('om-total').textContent = fmtPrice(priceNum * qty);
+  document.getElementById('om-error').style.display = 'none';
+  document.getElementById('om-name').value = '';
+  document.getElementById('om-phone').value = '';
+  document.getElementById('order-modal-overlay').classList.add('active');
+}
+function closeOrderModal(){
+  document.getElementById('order-modal-overlay').classList.remove('active');
+}
+function closeSuccessModal(){
+  document.getElementById('order-success-overlay').classList.remove('active');
+}
+async function submitOrder(e){
+  e.preventDefault();
+  const btn = document.getElementById('om-submit');
+  const errEl = document.getElementById('om-error');
+  errEl.style.display = 'none';
+  const name = document.getElementById('om-name').value.trim();
+  const phone = document.getElementById('om-phone').value.trim();
+  const qty = Math.max(1, parseInt(document.getElementById('pd-qty').value, 10) || 1);
+  if(!name || !phone){
+    errEl.textContent = 'Nama dan nomor telepon wajib diisi.';
+    errEl.style.display = 'block';
+    return false;
+  }
+  const payload = {
+    customerName: name,
+    phone: phone,
+    quantity: qty,
+    productName: currentProduct ? currentProduct.name : '',
+    product: currentProduct ? currentProduct.id : null
+  };
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+  try{
+    if(!API_BASE_URL) throw new Error('CMS belum terhubung');
+    const res = await fetch(API_BASE_URL + '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: payload })
+    });
+    if(!res.ok) throw new Error('Gagal mengirim pesanan ke CMS');
+    closeOrderModal();
+    document.getElementById('order-success-overlay').classList.add('active');
+  }catch(err){
+    console.warn('Gagal kirim pesanan ke CMS.', err);
+    errEl.textContent = 'Pesanan belum bisa tersimpan otomatis saat ini. Silakan coba lagi, atau hubungi admin langsung via WhatsApp.';
+    errEl.style.display = 'block';
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Kirim Pesanan';
+  }
+  return false;
+}
 
 function openArticle(id){
   const a = ARTICLES.find(x=>x.id===id);

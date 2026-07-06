@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orders",
+  "info": {
+    "singularName": "order",
+    "pluralName": "orders",
+    "displayName": "Pesanan (Order)",
+    "description": "Pesanan yang masuk dari tombol Beli Sekarang di halaman detail produk"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "customerName": { "type": "string", "required": true, "description": "Nama pemesan" },
+    "phone": { "type": "string", "required": true, "description": "Nomor telepon/WhatsApp pemesan" },
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "description": "Produk yang dipesan"
+    },
+    "productName": { "type": "string", "description": "Cadangan nama produk saat dipesan (kalau produk kemudian dihapus/diubah)" },
+    "quantity": { "type": "integer", "required": true, "default": 1, "min": 1 },
+    "note": { "type": "text", "description": "Catatan tambahan dari pemesan (opsional)" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["baru", "diproses", "selesai", "dibatalkan"],
+      "default": "baru",
+      "description": "Update status pesanan di sini setelah dihubungi/diproses"
+    }
+  }
+}

@@ -32,6 +32,9 @@ module.exports = {
       'api::site-setting.site-setting.find',
       // Leads: publik hanya boleh mengirim (create), tidak boleh membaca
       'api::lead.lead.create',
+      // Pesanan (Order) dari tombol Beli Sekarang: publik hanya boleh mengirim,
+      // tidak boleh membaca data pesanan orang lain.
+      'api::order.order.create',
     ];
 
     const publicRole = await strapi
