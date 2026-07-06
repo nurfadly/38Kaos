@@ -25,7 +25,7 @@
       "type": "enumeration",
       "enum": ["menunggu", "berhasil", "dibatalkan"],
       "default": "menunggu",
-      "description": "Ubah ke 'berhasil' kalau pesanan dikonfirmasi/sudah dibayar (stok produk otomatis berkurang & tercatat di Riwayat Stok). Ubah ke 'dibatalkan' kalau pesanan batal (kalau sebelumnya sudah 'berhasil', stok otomatis dikembalikan)."
+      "description": "Ubah ke 'berhasil' kalau pesanan dikonfirmasi/sudah dibayar, atau 'dibatalkan' kalau pesanan batal. Status ini murni untuk pencatatan pesanan - tidak memengaruhi stok produk (stok dikelola satu pintu lewat impor data Moka ke Riwayat Stok)."
     }
   }
 }
