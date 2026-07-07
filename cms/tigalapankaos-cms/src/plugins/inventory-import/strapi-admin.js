@@ -1,4 +1,4 @@
-import PluginIcon from './admin/src/components/PluginIcon';
+import PluginIcon from './admin/src/components/PluginIcon.jsx';
 
 /**
  * Admin entry point untuk plugin lokal "inventory-import".
@@ -20,7 +20,7 @@ export default {
         defaultMessage: 'Import Stok',
       },
       Component: async () => {
-        const { default: ImportStokPage } = await import('./admin/src/pages/ImportStokPage');
+        const { default: ImportStokPage } = await import('./admin/src/pages/ImportStokPage.jsx');
         return ImportStokPage;
       },
       permissions: [],

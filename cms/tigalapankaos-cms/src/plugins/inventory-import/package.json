@@ -1,0 +1,11 @@
+{
+  "name": "inventory-import",
+  "version": "0.1.0",
+  "description": "Plugin lokal: menu Import Stok Moka di sidebar admin",
+  "strapi": {
+    "name": "inventory-import",
+    "displayName": "Import Stok",
+    "kind": "plugin"
+  },
+  "main": "strapi-server.js"
+}
