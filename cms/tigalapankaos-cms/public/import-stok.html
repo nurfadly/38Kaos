@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Import Stok Moka — Tigalapankaos</title>
+<style>
+:root{
+  --cloud:#EFEFEF; --onyx:#0F0F0F; --silver:#8E8E8E; --gold:#F9A31A; --white:#FFFFFF;
+  --green:#2e7d32; --red:#b91c1c;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--cloud);color:var(--onyx);padding:24px;}
+.wrap{max-width:1100px;margin:0 auto;}
+h1{font-size:24px;font-weight:800;margin-bottom:4px;}
+.sub{color:var(--silver);font-size:13px;margin-bottom:24px;}
+.card{background:var(--white);border-radius:8px;padding:22px 24px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+.card h2{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;}
+.form-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;}
+.form-group{flex:1 1 220px;}
+.form-group label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#555;}
+.form-group input[type=file],.form-group input[type=password],.form-group input[type=text]{
+  width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:4px;font-size:13px;background:var(--white);
+}
+button{
+  background:var(--onyx);color:var(--white);border:none;padding:11px 22px;border-radius:4px;
+  font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.02em;
+}
+button:hover{background:#2a2a2a;}
+button:disabled{opacity:.5;cursor:not-allowed;}
+.status-msg{margin-top:10px;font-size:13px;padding:10px 14px;border-radius:4px;display:none;}
+.status-msg.info{display:block;background:#eef2ff;color:#3730a3;}
+.status-msg.success{display:block;background:#e8f5e9;color:var(--green);}
+.status-msg.error{display:block;background:#fdecea;color:var(--red);}
+.warn-box{background:#fff8e1;color:#8a6100;font-size:12px;padding:10px 14px;border-radius:4px;margin-bottom:16px;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+.stat{background:var(--cloud);border-radius:6px;padding:16px;text-align:center;}
+.stat .num{font-size:22px;font-weight:900;}
+.stat .label{font-size:11px;color:var(--silver);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;}
+.stat.alert .num{color:#b45309;}
+.stat.danger .num{color:var(--red);}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #eee;}
+th{color:var(--silver);font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+td.num-col,th.num-col{text-align:right;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:800px){.two-col{grid-template-columns:1fr;}}
+.empty-note{color:var(--silver);font-size:13px;padding:20px 0;text-align:center;}
+.last-import{font-size:12px;color:var(--silver);margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Import &amp; Dashboard Stok Moka</h1>
+  <div class="sub">Upload file "Inventory Summary" hasil export dari Moka. Setiap import akan MENIMPA seluruh data stok sebelumnya dengan data baru dari file ini.</div>
+
+  <div class="card">
+    <h2>Import File</h2>
+    <div class="warn-box">⚠️ Import akan menghapus seluruh data Ringkasan Stok Moka yang lama dan menggantinya dengan isi file ini. Pastikan file yang diupload sudah benar.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kunci Import</label>
+        <input type="password" id="import-key" placeholder="Sesuai INVENTORY_IMPORT_KEY di .env">
+      </div>
+      <div class="form-group" style="flex:2 1 300px;">
+        <label>File (.csv atau .xlsx)</label>
+        <input type="file" id="import-file" accept=".csv,.xlsx,.xls">
+      </div>
+      <div class="form-group" style="flex:0 0 auto;">
+        <button id="import-btn" onclick="doImport()">Import Sekarang</button>
+      </div>
+    </div>
+    <div class="status-msg" id="import-status"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 style="margin:0;">Dashboard Stok</h2>
+      <button onclick="loadSummary()">Muat Ulang</button>
+    </div>
+    <div id="dashboard-body">
+      <div class="empty-note">Masukkan kunci import lalu klik "Muat Ulang" untuk menampilkan dashboard.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY_STORAGE = 'inv_import_key';
+document.getElementById('import-key').value = localStorage.getItem(KEY_STORAGE) || '';
+
+function fmtNum(n){ return Number(n||0).toLocaleString('id-ID'); }
+
+async function doImport(){
+  const key = document.getElementById('import-key').value.trim();
+  const fileInput = document.getElementById('import-file');
+  const statusEl = document.getElementById('import-status');
+  const btn = document.getElementById('import-btn');
+
+  if(!key){ showStatus(statusEl, 'error', 'Kunci import wajib diisi.'); return; }
+  if(!fileInput.files.length){ showStatus(statusEl, 'error', 'Pilih file terlebih dahulu.'); return; }
+  if(!confirm('Import akan MENIMPA seluruh data stok yang lama. Lanjutkan?')) return;
+
+  localStorage.setItem(KEY_STORAGE, key);
+
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+
+  btn.disabled = true;
+  showStatus(statusEl, 'info', 'Mengupload & memproses file, mohon tunggu (bisa beberapa puluh detik untuk file besar)...');
+
+  try{
+    const res = await fetch('/api/inventory-snapshots/import', {
+      method: 'POST',
+      headers: { 'x-import-key': key },
+      body: formData
+    });
+    const data = await res.json();
+    if(!res.ok){ throw new Error(data.error && data.error.message ? data.error.message : (data.message || 'Import gagal')); }
+    showStatus(statusEl, 'success', `Import berhasil! ${fmtNum(data.totalRows)} baris, ${fmtNum(data.totalProdukUnik)} produk unik, ${data.totalOutlet} outlet.`);
+    fileInput.value = '';
+    loadSummary();
+  }catch(err){
+    showStatus(statusEl, 'error', 'Gagal: ' + err.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function showStatus(el, type, msg){
+  el.className = 'status-msg ' + type;
+  el.textContent = msg;
+}
+
+async function loadSummary(){
+  const key = document.getElementById('import-key').value.trim();
+  const body = document.getElementById('dashboard-body');
+  if(!key){ body.innerHTML = '<div class="empty-note">Masukkan kunci import terlebih dahulu.</div>'; return; }
+  localStorage.setItem(KEY_STORAGE, key);
+  body.innerHTML = '<div class="empty-note">Memuat...</div>';
+  try{
+    const res = await fetch('/api/inventory-snapshots/summary', { headers: { 'x-import-key': key } });
+    const data = await res.json();
+    if(!res.ok){ throw new Error(data.error && data.error.message ? data.error.message : 'Gagal memuat dashboard'); }
+    if(data.empty){ body.innerHTML = '<div class="empty-note">' + data.message + '</div>'; return; }
+    renderDashboard(body, data);
+  }catch(err){
+    body.innerHTML = '<div class="empty-note" style="color:#b91c1c;">Gagal memuat: ' + err.message + '</div>';
+  }
+}
+
+function renderDashboard(body, d){
+  const lastImport = d.lastImportedAt ? new Date(d.lastImportedAt).toLocaleString('id-ID') : '-';
+  body.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat"><div class="num">${fmtNum(d.totalProdukUnik)}</div><div class="label">Produk Unik</div></div>
+      <div class="stat"><div class="num">${fmtNum(d.totalOutlet)}</div><div class="label">Outlet</div></div>
+      <div class="stat"><div class="num">${fmtNum(d.totalKategori)}</div><div class="label">Kategori</div></div>
+      <div class="stat"><div class="num">${fmtNum(d.totalEnding)}</div><div class="label">Total Stok Akhir</div></div>
+      <div class="stat"><div class="num">${fmtNum(d.totalSales)}</div><div class="label">Total Sales</div></div>
+      <div class="stat alert"><div class="num">${fmtNum(d.lowStockCount)}</div><div class="label">Baris Stok Menipis (&le;${d.lowStockThreshold})</div></div>
+      <div class="stat danger"><div class="num">${fmtNum(d.outOfStockCount)}</div><div class="label">Baris Stok Habis</div></div>
+    </div>
+    <div class="last-import">Total ${fmtNum(d.totalRows)} baris data &middot; Terakhir diimpor: ${lastImport}</div>
+
+    <div class="two-col" style="margin-top:26px;">
+      <div>
+        <h2 style="font-size:13px;margin-bottom:10px;">Ringkasan per Kategori</h2>
+        <table>
+          <thead><tr><th>Kategori</th><th class="num-col">SKU</th><th class="num-col">Stok Akhir</th><th class="num-col">Sales</th></tr></thead>
+          <tbody>${d.byCategory.map(c=>`<tr><td>${esc(c.category)}</td><td class="num-col">${fmtNum(c.skuCount)}</td><td class="num-col">${fmtNum(c.ending)}</td><td class="num-col">${fmtNum(c.sales)}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <div>
+        <h2 style="font-size:13px;margin-bottom:10px;">Ringkasan per Outlet</h2>
+        <table>
+          <thead><tr><th>Outlet</th><th class="num-col">SKU</th><th class="num-col">Stok Akhir</th><th class="num-col">Sales</th></tr></thead>
+          <tbody>${d.byOutlet.map(o=>`<tr><td>${esc(o.outlet)}</td><td class="num-col">${fmtNum(o.skuCount)}</td><td class="num-col">${fmtNum(o.ending)}</td><td class="num-col">${fmtNum(o.sales)}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:26px;">
+      <div>
+        <h2 style="font-size:13px;margin-bottom:10px;">Terlaris (Top 15 Sales, gabungan semua outlet)</h2>
+        <table>
+          <thead><tr><th>Nama - Varian</th><th class="num-col">Sales</th><th class="num-col">Sisa Stok</th></tr></thead>
+          <tbody>${d.topSelling.map(p=>`<tr><td>${esc(p.nameVariant)}</td><td class="num-col">${fmtNum(p.sales)}</td><td class="num-col">${fmtNum(p.ending)}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <div>
+        <h2 style="font-size:13px;margin-bottom:10px;">Stok Menipis (&le; ${d.lowStockThreshold}, gabungan semua outlet)</h2>
+        <table>
+          <thead><tr><th>Nama - Varian</th><th class="num-col">Sisa Stok</th></tr></thead>
+          <tbody>${d.lowStockList.length ? d.lowStockList.map(p=>`<tr><td>${esc(p.nameVariant)}</td><td class="num-col">${fmtNum(p.ending)}</td></tr>`).join('') : '<tr><td colspan="2" style="color:#8E8E8E;">Tidak ada</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function esc(s){
+  return String(s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+if(document.getElementById('import-key').value){ loadSummary(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventory_snapshots",
+  "info": {
+    "singularName": "inventory-snapshot",
+    "pluralName": "inventory-snapshots",
+    "displayName": "Ringkasan Stok Moka",
+    "description": "Data mentah dari file export 'Inventory Summary' Moka. Diisi lewat halaman Import Stok (bukan diinput manual satu-satu) - setiap import akan MENIMPA seluruh data di sini dengan data baru."
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "nameVariant": {
+      "type": "string",
+      "required": true,
+      "description": "Kolom 'Name - Variant' dari Moka, contoh: ABU MISTY 30S PDK L"
+    },
+    "category": { "type": "string", "description": "Kolom 'Category' dari Moka" },
+    "outlet": { "type": "string", "description": "Kolom 'Outlet' dari Moka" },
+    "beginning": { "type": "integer", "default": 0 },
+    "purchaseOrder": { "type": "integer", "default": 0 },
+    "sales": { "type": "integer", "default": 0 },
+    "transfer": { "type": "integer", "default": 0 },
+    "adjustment": { "type": "integer", "default": 0 },
+    "ending": { "type": "integer", "default": 0, "description": "Stok akhir - kolom 'Ending' dari Moka" }
+  }
+}

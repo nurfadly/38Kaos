@@ -32,7 +32,17 @@ module.exports = [
   },
   'strapi::poweredBy',
   'strapi::query',
-  'strapi::body',
+  {
+    name: 'strapi::body',
+    config: {
+      // Dinaikkan supaya file export Inventory Summary dari Moka (bisa beberapa MB
+      // untuk puluhan ribu baris) tidak ditolak saat diupload lewat halaman Import Stok.
+      formLimit: '30mb',
+      jsonLimit: '30mb',
+      textLimit: '30mb',
+      formidable: { maxFileSize: 30 * 1024 * 1024 },
+    },
+  },
   'strapi::session',
   'strapi::favicon',
   'strapi::public',

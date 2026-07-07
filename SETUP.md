@@ -33,6 +33,8 @@ Lalu buka file `.env` dan isi bagian secret (`APP_KEYS`, `API_TOKEN_SALT`, `ADMI
 openssl rand -base64 32
 ```
 
+Isi juga `INVENTORY_IMPORT_KEY` dengan teks rahasia bebas (dipakai untuk halaman Import Stok, lihat bagian [Import Stok Moka](#import-stok-moka) di bawah).
+
 ## Menjalankan CMS
 
 Mode development (auto-reload saat ada perubahan kode):
@@ -49,6 +51,18 @@ npm run start
 Setelah jalan, buka:
 - Admin panel: `http://localhost:1337/admin`
 - API: `http://localhost:1337/api/...`
+
+## Import Stok Moka
+
+Data stok dikelola satu pintu lewat file export "Inventory Summary" dari Moka (bukan diinput manual di Content Manager). Caranya:
+
+1. Buka `<alamat CMS>/import-stok.html` di browser (contoh: `http://localhost:1337/import-stok.html`).
+2. Masukkan **Kunci Import** — harus sama persis dengan nilai `INVENTORY_IMPORT_KEY` di file `.env` server.
+3. Pilih file `.csv` atau `.xlsx` hasil export Moka, lalu klik **Import Sekarang**.
+4. Setiap import akan **menimpa seluruh data stok lama** dengan data dari file yang baru diupload (bukan menambah/menggabung).
+5. Dashboard ringkasan (total produk, per kategori, per outlet, stok menipis/habis, terlaris) otomatis muncul di halaman yang sama setelah import berhasil, atau klik **Muat Ulang** kapan saja.
+
+Data mentahnya juga bisa dilihat/dicari lewat Content Manager di admin Strapi, menu **Ringkasan Stok Moka**.
 
 ## Menjalankan Website
 
@@ -67,5 +81,6 @@ Cukup buka file `index.html` langsung di browser, atau serve dengan server stati
 | react-dom | ^18.0.0 |
 | react-router-dom | ^6.0.0 |
 | styled-components | ^6.0.0 |
+| xlsx | ^0.18.5 |
 
 Semua ini otomatis terinstall lewat `npm install` — tidak perlu diinstall satu-satu manual.
