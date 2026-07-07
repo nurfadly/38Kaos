@@ -33,7 +33,7 @@ Lalu buka file `.env` dan isi bagian secret (`APP_KEYS`, `API_TOKEN_SALT`, `ADMI
 openssl rand -base64 32
 ```
 
-Isi juga `INVENTORY_IMPORT_KEY` dengan teks rahasia bebas (dipakai untuk halaman Import Stok, lihat bagian [Import Stok Moka](#import-stok-moka) di bawah).
+Isi juga `INVENTORY_IMPORT_KEY` dengan teks rahasia bebas (dipakai untuk menu Import Stok, lihat bagian [Import Stok Moka](#import-stok-moka) di bawah).
 
 ## Menjalankan CMS
 
@@ -56,13 +56,15 @@ Setelah jalan, buka:
 
 Data stok dikelola satu pintu lewat file export "Inventory Summary" dari Moka (bukan diinput manual di Content Manager). Caranya:
 
-1. Buka `<alamat CMS>/import-stok.html` di browser (contoh: `http://localhost:1337/import-stok.html`).
+1. Login ke admin Strapi (`http://localhost:1337/admin`), lalu klik menu **Import Stok** di sidebar kiri (ikon kotak).
 2. Masukkan **Kunci Import** — harus sama persis dengan nilai `INVENTORY_IMPORT_KEY` di file `.env` server.
 3. Pilih file `.csv` atau `.xlsx` hasil export Moka, lalu klik **Import Sekarang**.
 4. Setiap import akan **menimpa seluruh data stok lama** dengan data dari file yang baru diupload (bukan menambah/menggabung).
 5. Dashboard ringkasan (total produk, per kategori, per outlet, stok menipis/habis, terlaris) otomatis muncul di halaman yang sama setelah import berhasil, atau klik **Muat Ulang** kapan saja.
 
 Data mentahnya juga bisa dilihat/dicari lewat Content Manager di admin Strapi, menu **Ringkasan Stok Moka**.
+
+Ada juga versi cadangan di `<alamat CMS>/import-stok.html` (halaman mandiri di luar admin) kalau sewaktu-waktu menu di admin bermasalah — fungsinya identik.
 
 ## Menjalankan Website
 
